@@ -40,7 +40,7 @@ function onSignIn(googleUser) {
 
 @app.route('/dumdum/<idtoken>')
 def about(idtoken):
-    creds = Credentials(id_token=idtoken)
+    creds = Credentials(None, id_token=idtoken)
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
