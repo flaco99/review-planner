@@ -16,6 +16,7 @@ def home():
 function onSignIn(googleUser) {
   var profile = googleUser.getBasicProfile();
   var id_token = googleUser.getAuthResponse().id_token;
+  window.location.replace("https://review-planner.vercel.app/dumdum/" + id_token);
   console.log('ID token: ' + id_token);
   console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
   console.log('Name: ' + profile.getName());
