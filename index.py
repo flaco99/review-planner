@@ -33,9 +33,9 @@ function onSignIn(googleUser) {
     return html
 
 
-@app.route('/about')
-def about():
-    return 'About Page Route'
+@app.route('/dumdum/<tokenid>')
+def about(tokenid):
+    return f"dumdum {tokenid}"
 
 
 @app.route('/portfolio')
