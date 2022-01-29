@@ -6,7 +6,20 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "<html><head><title>just a page</title></head><body>Hello, I'm in html</body></html>"
+    html = """
+    <html>
+    <head>
+    <title>just a page</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="769017929605-rpovnc5j01547ktb1er5fc0qqcd6fcer.apps.googleusercontent.com">
+    </head>
+    <body>
+    <p>Hello, I'm in html</p>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    </body>
+    </html>
+    """
+    return html
 
 
 @app.route('/about')
