@@ -47,18 +47,17 @@ def about(idtoken):
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
     print('Getting the upcoming 10 events')
     events_result = service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=10, singleEvents=True,
-                                              orderBy='startTime').execute()
+                                          maxResults=10, singleEvents=True,
+                                          orderBy='startTime').execute()
     events = events_result.get('items', [])
     if not events:
-            return 'No upcoming events found.'
-            return
+        return 'No upcoming events found.'
 
     result = ""
     # Prints the start and name of the next 10 events
     for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            result += f"{start} {event['summary']}"
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        result += f"{start} {event['summary']}"
     return result
 
 
