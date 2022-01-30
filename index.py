@@ -9,12 +9,12 @@ import datetime
 
 app = Flask(__name__,
             static_url_path='',
-            static_folder='static')
+            static_folder='../static')
 
 
 @app.route('/')
 def home():
-    return app.send_static_file('static/index.html')
+    return app.send_static_file('../static/index.html')
 
 
 @app.route('/dumdum/<idtoken>')
