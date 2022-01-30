@@ -14,7 +14,10 @@ app = Flask(__name__,
 
 @app.route('/')
 def home():
-    return app.send_static_file('../static/index.html')
+    try:
+        return app.send_static_file('../static/index.html')
+    except Exception as e:
+        return str(traceback.format_exc())
 
 
 @app.route('/dumdum/<idtoken>')
