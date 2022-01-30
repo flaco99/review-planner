@@ -50,32 +50,34 @@ def home():
 
 @app.route('/oauthcallback')
 def oauthcallback():
-    authcode = request.args.get('code')
+    try:
+        authcode = request.args.get('code')
 
-    state = flask.session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_config(
-        client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
-        scopes=['https://www.googleapis.com/auth/calendar.events'])
-    flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
+        state = flask.session['state']
+        flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
+            scopes=['https://www.googleapis.com/auth/calendar.events'])
+        flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
 
-    authorization_response = flask.request.url
-    flow.fetch_token(authorization_response=authorization_response)
+        authorization_response = flask.request.url
+        flow.fetch_token(authorization_response=authorization_response)
 
-    # Store the credentials in the session.
-    # ACTION ITEM for developers:
-    #     Store user's access and refresh tokens in your data store if
-    #     incorporating this code into your real app.
-    credentials = flow.credentials
-    flask.session['credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes}
+        # Store the credentials in the session.
+        # ACTION ITEM for developers:
+        #     Store user's access and refresh tokens in your data store if
+        #     incorporating this code into your real app.
+        credentials = flow.credentials
+        flask.session['credentials'] = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes}
 
-
-    return "OK"
+        return "OK"
+    except Exception as e:
+        return str(traceback.format_exc())
 
 @app.route('/dumdum/<idtoken>')
 def about(idtoken):
