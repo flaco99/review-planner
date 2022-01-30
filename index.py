@@ -6,6 +6,11 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import traceback
 import datetime
+import google_auth_oauthlib.flow
+from os import environ
+from flask import request
+import flask
+
 
 app = Flask(__name__,
             static_url_path='',
@@ -15,10 +20,64 @@ app = Flask(__name__,
 @app.route('/')
 def home():
     try:
-        return app.send_static_file('index.html')
+        # Use the client_secret.json file to identify the application requesting
+        # authorization. The client ID (from that file) and access scopes are required.
+        with open("client_secret.json", "w") as f:
+            f.write(environ["CLIENT_SECRET_JSON"])
+        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+            'client_secret.json',
+            scopes=['https://www.googleapis.com/auth/calendar.events'])
+
+        # Indicate where the API server will redirect the user after the user completes
+        # the authorization flow. The redirect URI is required. The value must exactly
+        # match one of the authorized redirect URIs for the OAuth 2.0 client, which you
+        # configured in the API Console. If this value doesn't match an authorized URI,
+        # you will get a 'redirect_uri_mismatch' error.
+        flow.redirect_uri = 'https://review-planner.vercel.app/oauthcallback'
+
+        # Generate URL for request to Google's OAuth 2.0 server.
+        # Use kwargs to set optional request parameters.
+        authorization_url, state = flow.authorization_url(
+            # Enable offline access so that you can refresh an access token without
+            # re-prompting the user for permission. Recommended for web server apps.
+            access_type='offline',
+            login_hint='naomi@neopatent.com',
+            prompt='consent',
+            # Enable incremental authorization. Recommended as a best practice.
+            include_granted_scopes='true')
+        return flask.redirect(authorization_url)
     except Exception as e:
         return str(traceback.format_exc())
 
+@app.route('/oauthcallback')
+def oauthcallback():
+    authcode = request.args.get('code')
+
+    state = flask.session['state']
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        'client_secret.json',
+        scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
+        state=state)
+    flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
+
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
+
+    # Store the credentials in the session.
+    # ACTION ITEM for developers:
+    #     Store user's access and refresh tokens in your data store if
+    #     incorporating this code into your real app.
+    credentials = flow.credentials
+    flask.session['credentials'] = {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes}
+
+
+    return "OK"
 
 @app.route('/dumdum/<idtoken>')
 def about(idtoken):
