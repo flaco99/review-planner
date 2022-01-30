@@ -44,6 +44,7 @@ def home():
             prompt='consent',
             # Enable incremental authorization. Recommended as a best practice.
             include_granted_scopes='true')
+        flask.session['state'] = state
         return flask.redirect(authorization_url)
     except Exception as e:
         return str(traceback.format_exc())
@@ -51,12 +52,13 @@ def home():
 @app.route('/oauthcallback')
 def oauthcallback():
     try:
-        authcode = request.args.get('code')
+        # authcode = request.args.get('code')
 
         state = flask.session['state']
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
-            scopes=['https://www.googleapis.com/auth/calendar.events'])
+            scopes=['https://www.googleapis.com/auth/calendar.events'],
+            state=state)
         flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
 
         authorization_response = flask.request.url
