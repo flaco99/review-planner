@@ -15,7 +15,7 @@ app = Flask(__name__,
 @app.route('/')
 def home():
     try:
-        return app.send_static_file('../static/index.html')
+        return app.send_static_file('static/index.html')
     except Exception as e:
         return str(traceback.format_exc())
 
