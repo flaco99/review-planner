@@ -15,6 +15,8 @@ import json
 app = Flask(__name__,
             static_url_path='',
             static_folder='static/')
+app.secret_key = environ["A8CF5DBA1AF5B4A9DC137657C36A6"]
+
 
 
 @app.route('/')
