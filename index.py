@@ -10,7 +10,7 @@ import google_auth_oauthlib.flow
 from os import environ
 from flask import request
 import flask
-
+import json
 
 app = Flask(__name__,
             static_url_path='',
@@ -22,10 +22,9 @@ def home():
     try:
         # Use the client_secret.json file to identify the application requesting
         # authorization. The client ID (from that file) and access scopes are required.
-        with open("client_secret.json", "w") as f:
-            f.write(environ["CLIENT_SECRET_JSON"])
-        flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-            'client_secret.json',
+
+        flow = google_auth_oauthlib.flow.Flow.from_client_config(
+            client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
             scopes=['https://www.googleapis.com/auth/calendar.events'])
 
         # Indicate where the API server will redirect the user after the user completes
@@ -54,10 +53,9 @@ def oauthcallback():
     authcode = request.args.get('code')
 
     state = flask.session['state']
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        'client_secret.json',
-        scopes=['https://www.googleapis.com/auth/drive.metadata.readonly'],
-        state=state)
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+        client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
+        scopes=['https://www.googleapis.com/auth/calendar.events'])
     flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
 
     authorization_response = flask.request.url
