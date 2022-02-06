@@ -30,7 +30,7 @@ def home():
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
 
-    newEvent = calendar.insert(calendarId='primary', description="something", conferenceDataVersion=None, maxAttendees=None,
+    calendar.insert(calendarId='primary', summary="something", conferenceDataVersion=None, maxAttendees=None,
                                          sendNotifications=None,
                                          sendUpdates=None, supportsAttachments=None)
 
@@ -48,7 +48,6 @@ def home():
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
         result += f"<li>{start} - {event['summary']}</li>"
-    result += newEvent
     result += "</ul>"
     return result
 
