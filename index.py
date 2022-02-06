@@ -86,7 +86,7 @@ def oauthcallback():
             'client_secret': credentials.client_secret,
             'scopes': credentials.scopes}
 
-        return flask.redirect(flask.url_for('test_api_request'))
+        return flask.redirect(flask.url_for('home'))
     except Exception as e:
         print(traceback.format_exc())
         raise e
