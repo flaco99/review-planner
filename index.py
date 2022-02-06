@@ -30,8 +30,8 @@ def home():
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
 
-    calendar.insert(calendarId='primary', start=now, summary="something", description='some description',
-                    conferenceDataVersion=None, maxAttendees=None, sendNotifications=None, sendUpdates=None, supportsAttachments=None)
+    # calendar.insert(calendarId='primary', start=now, summary="something", description='some description',
+    #                conferenceDataVersion=None, maxAttendees=None, sendNotifications=None, sendUpdates=None, supportsAttachments=None)
 
 
     print('Getting the upcoming 10 events')
