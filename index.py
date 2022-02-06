@@ -30,7 +30,7 @@ def home():
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
 
-    calendar.insert(calendarId='primary', startdate=now, summary="something", description='some description',
+    calendar.insert(calendarId='primary', start=now, summary="something", description='some description',
                     conferenceDataVersion=None, maxAttendees=None, sendNotifications=None, sendUpdates=None, supportsAttachments=None)
 
 
