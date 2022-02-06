@@ -34,7 +34,6 @@ def home():
                     conferenceDataVersion=None, maxAttendees=None, sendNotifications=None, sendUpdates=None, supportsAttachments=None)
 
 
-
     print('Getting the upcoming 10 events')
     events_result = calendar.events().list(calendarId='primary', timeMin=now,
                                           maxResults=10, singleEvents=True,
