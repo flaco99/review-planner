@@ -11,7 +11,6 @@ from os import environ
 from flask import request
 import flask
 import json
-
 app = Flask(__name__,
             static_url_path='',
             static_folder='static/')
@@ -24,18 +23,15 @@ def home():
     try:
         # Use the client_secret.json file to identify the application requesting
         # authorization. The client ID (from that file) and access scopes are required.
-
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
             scopes=['https://www.googleapis.com/auth/calendar.events'])
-
         # Indicate where the API server will redirect the user after the user completes
         # the authorization flow. The redirect URI is required. The value must exactly
         # match one of the authorized redirect URIs for the OAuth 2.0 client, which you
         # configured in the API Console. If this value doesn't match an authorized URI,
         # you will get a 'redirect_uri_mismatch' error.
         flow.redirect_uri = 'https://review-planner.vercel.app/oauthcallback'
-
         # Generate URL for request to Google's OAuth 2.0 server.
         # Use kwargs to set optional request parameters.
         authorization_url, state = flow.authorization_url(
@@ -50,22 +46,18 @@ def home():
         return flask.redirect(authorization_url)
     except Exception as e:
         return str(traceback.format_exc())
-
 @app.route('/oauthcallback')
 def oauthcallback():
     try:
         # authcode = request.args.get('code')
-
         state = flask.session['state']
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
             scopes=['https://www.googleapis.com/auth/calendar.events'],
             state=state)
         flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
-
         authorization_response = flask.request.url
         flow.fetch_token(authorization_response=authorization_response)
-
         # Store the credentials in the session.
         # ACTION ITEM for developers:
         #     Store user's access and refresh tokens in your data store if
@@ -78,17 +70,14 @@ def oauthcallback():
             'client_id': credentials.client_id,
             'client_secret': credentials.client_secret,
             'scopes': credentials.scopes}
-
         return "OK"
     except Exception as e:
         return str(traceback.format_exc())
-
 @app.route('/dumdum/<idtoken>')
 def about(idtoken):
     try:
         creds = Credentials(None, id_token=idtoken)
         service = build('calendar', 'v3', credentials=creds)
-
         # Call the Calendar API
         now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         print('Getting the upcoming 10 events')
@@ -98,7 +87,6 @@ def about(idtoken):
         events = events_result.get('items', [])
         if not events:
             return 'No upcoming events found.'
-
         result = ""
         # Prints the start and name of the next 10 events
         for event in events:
@@ -107,8 +95,6 @@ def about(idtoken):
         return result
     except Exception as e:
         return str(traceback.format_exc())
-
-
 @app.route('/portfolio')
 def portfolio():
     return 'Portfolio Page Route'
