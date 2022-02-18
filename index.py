@@ -17,7 +17,7 @@ app.secret_key = environ["FLASK_SECRET_KEY"]
 
 @app.route('/')
 def home():
-    render_template('index.html')
+    render_template('templates/index.html')
 
 @app.route('/create')
 def create():
