@@ -7,7 +7,7 @@ import datetime
 import google_auth_oauthlib.flow
 from os import environ
 import flask
-from flask import render_template
+from flask import render_template, request
 import json
 
 app = Flask(__name__,
@@ -19,8 +19,9 @@ app.secret_key = environ["FLASK_SECRET_KEY"]
 def home():
     return render_template('index.html')
 
-@app.route('/create')
+@app.route('/create', methods = ['POST'])
 def create():
+    eventname = request.form['eventname']
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
@@ -45,7 +46,7 @@ def create():
     day9 = (day0 + datetime.timedelta(days=139)).isoformat() + 'Z'
     for day in [day1, day2, day3, day4, day5, day6, day7, day8, day9]:
         event = {
-            'summary': 'testpoop',
+            'summary': eventname,
             'start': {
                 'dateTime': day,
             },
@@ -56,7 +57,7 @@ def create():
         # Call the Calendar API
         calendar.events().insert(calendarId='primary', sendNotifications=True, body=event).execute()
 
-    return 'ok'
+    return f"OK: {eventname}"
 
 
 
