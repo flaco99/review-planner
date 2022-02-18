@@ -10,7 +10,6 @@ import google_auth_oauthlib.flow
 from os import environ
 from flask import request
 import flask
-import json
 
 app = Flask(__name__,
             static_url_path='',
