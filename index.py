@@ -20,7 +20,7 @@ def home():
     render_template('index.html')
 
 @app.route('/create')
-def home():
+def create():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
