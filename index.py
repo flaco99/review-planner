@@ -10,6 +10,7 @@ import google_auth_oauthlib.flow
 from os import environ
 from flask import request
 import flask
+import json
 
 app = Flask(__name__,
             static_url_path='',
@@ -28,36 +29,20 @@ def home():
 
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+    print('Getting the upcoming 10 events')
+    events_result = calendar.events().list(calendarId='primary', timeMin=now,
+                                          maxResults=10, singleEvents=True,
+                                          orderBy='startTime').execute()
+    events = events_result.get('items', [])
+    if not events:
+        return 'No upcoming events found.'
 
-
-
-    # set review events
-    day0 = datetime.datetime.today() - datetime.timedelta(days=1)
-    day1 = (day0 + datetime.timedelta(days=1)).isoformat() + 'Z'
-    day2 = (day0 + datetime.timedelta(days=3)).isoformat() + 'Z'
-    day3 = (day0 + datetime.timedelta(days=6)).isoformat() + 'Z'
-    day4 = (day0 + datetime.timedelta(days=13)).isoformat() + 'Z'
-    day5 = (day0 + datetime.timedelta(days=27)).isoformat() + 'Z'
-    day6 = (day0 + datetime.timedelta(days=55)).isoformat() + 'Z'
-    day7 = (day0 + datetime.timedelta(days=83)).isoformat() + 'Z'
-    day8 = (day0 + datetime.timedelta(days=111)).isoformat() + 'Z'
-    day9 = (day0 + datetime.timedelta(days=139)).isoformat() + 'Z'
-    for day in [day1, day2, day3, day4, day5, day6, day7, day8, day9]:
-        event = {
-            'summary': 'testpoop',
-            'start': {
-                'dateTime': day,
-            },
-            'end': {
-                'dateTime': day,
-            }
-        }
-        # Call the Calendar API
-        calendar.events().insert(calendarId='primary', sendNotifications=True, body=event).execute()
-
-    return 'ok'
-
-
+    result = "<ul>"
+    for event in events:
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        result += f"<li>{start} - {event['summary']}</li>"
+    result += "</ul>"
+    return result
 
 @app.route('/authorize')
 def authorize():
