@@ -1,15 +1,13 @@
 from flask import Flask
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 import traceback
 import datetime
 import google_auth_oauthlib.flow
 from os import environ
-from flask import request
 import flask
+from flask import render_template
 import json
 
 app = Flask(__name__,
@@ -17,9 +15,11 @@ app = Flask(__name__,
             static_folder='static/')
 app.secret_key = environ["FLASK_SECRET_KEY"]
 
-
-
 @app.route('/')
+def home():
+    render_template('index.html')
+
+@app.route('/create')
 def home():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
