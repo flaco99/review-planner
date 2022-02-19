@@ -39,8 +39,7 @@ def create():
 
     # duration of event shrinks when days increase
 
-    # also must review 10 minutes immediately after class/ when you first learn it
-
+    # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
 
     maxdays = 60
@@ -48,9 +47,6 @@ def create():
     intervalfactor = 3
     duration = 10
     while daysplus < maxdays:
-        daysplus = daysplus*intervalfactor
-        duration = duration/2
-        day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
         event = {
             'summary': eventname,
             'start': {
@@ -60,31 +56,15 @@ def create():
                 'dateTime': day,
             }
         }
-    #
-    # day1 = (day0 + datetime.timedelta(days=1)).isoformat() + 'Z'
-    # day2 = (day0 + datetime.timedelta(days=3)).isoformat() + 'Z'
-    # day3 = (day0 + datetime.timedelta(days=6)).isoformat() + 'Z'
-    # day4 = (day0 + datetime.timedelta(days=13)).isoformat() + 'Z'
-    # day5 = (day0 + datetime.timedelta(days=27)).isoformat() + 'Z'
-    # day6 = (day0 + datetime.timedelta(days=55)).isoformat() + 'Z'
-    # day7 = (day0 + datetime.timedelta(days=83)).isoformat() + 'Z'
-    # day8 = (day0 + datetime.timedelta(days=111)).isoformat() + 'Z'
-    # day9 = (day0 + datetime.timedelta(days=139)).isoformat() + 'Z'
-    # for day in [day1, day2, day3, day4, day5, day6, day7, day8, day9]:
-    #     event = {
-    #         'summary': eventname,
-    #         'start': {
-    #             'dateTime': day,
-    #         },
-    #         'end': {
-    #             'dateTime': day,
-    #         }
-    #     }
         # Call the Calendar API
         calendar.events().insert(calendarId='primary', sendNotifications=True, body=event).execute()
 
-    return f"OK: {eventname}"
+        # set to the next day
+        daysplus = daysplus * intervalfactor
+        duration = duration / 2
+        day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
 
+    return f"OK: {eventname}"
 
 
 @app.route('/authorize')
