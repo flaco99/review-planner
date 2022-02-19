@@ -1,5 +1,6 @@
 from flask import Flask
 from google.oauth2.credentials import Credentials
+from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import traceback
@@ -18,6 +19,12 @@ app.secret_key = environ["FLASK_SECRET_KEY"]
 @app.route('/')
 def home():
     if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+    try:
+        calendar.events().list(calendarId='primary', maxResults=10).execute()
+    except RefreshError:
         return flask.redirect('authorize')
     return render_template('index.html')
 
@@ -104,7 +111,6 @@ def authorize():
 
 @app.route('/oauthcallback')
 def oauthcallback():
-    print("hello")
     try:
         state = flask.session['state']
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
