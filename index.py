@@ -47,6 +47,7 @@ def create():
     intervalfactor = 3
     duration = 10
     while daysplus < maxdays:
+        day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
         event = {
             'summary': eventname,
             'start': {
@@ -62,7 +63,6 @@ def create():
         # set to the next day
         daysplus = daysplus * intervalfactor
         duration = duration / 2
-        day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
 
     return f"OK: {eventname}"
 
