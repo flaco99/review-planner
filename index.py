@@ -17,17 +17,19 @@ app.secret_key = environ["FLASK_SECRET_KEY"]
 
 @app.route('/')
 def home():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
     return render_template('index.html')
 
 @app.route('/create', methods = ['POST'])
 def create():
-    eventname = request.form['eventname']
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
 
+    eventname = request.form['eventname']
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
 
@@ -43,11 +45,11 @@ def create():
 
     maxdays = 60
     daysplus = 1
-    intervalFactor = 3
+    intervalfactor = 3
     duration = 10
-    while daysplus<maxdays:
-        daysplus=daysplus*intervalFactor
-        duration=duration/2
+    while daysplus < maxdays:
+        daysplus = daysplus*intervalfactor
+        duration = duration/2
         day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
         event = {
             'summary': eventname,
