@@ -37,6 +37,7 @@ def create():
     calendar = build("calendar", "v3", credentials=credentials)
 
     eventname = request.form['eventname']
+    # eventtime = request.form['eventtime']
 
     now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
 
@@ -49,10 +50,11 @@ def create():
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
 
-    maxdays = 60
+    maxdays = 360
     daysplus = 1
     intervalfactor = 3
     duration = 10
+    all_links = []
     while daysplus < maxdays:
         day = (day0 + datetime.timedelta(days=daysplus)).isoformat() + 'Z'
         event = {
@@ -65,13 +67,14 @@ def create():
             }
         }
         # Call the Calendar API
-        calendar.events().insert(calendarId='primary', sendNotifications=True, body=event).execute()
+        event = calendar.events().insert(calendarId='primary', sendNotifications=True, body=event).execute()
+        all_links.append(event.get('htmlLink'))
 
         # set to the next day
         daysplus = daysplus * intervalfactor
         duration = duration / 2
 
-    return f"OK: {eventname}"
+    return render_template('success.html', eventname=eventname, all_links=all_links)
 
 
 @app.route('/authorize')
@@ -79,7 +82,7 @@ def authorize():
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
         client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
         scopes=['https://www.googleapis.com/auth/calendar.events'])
-    flow.redirect_uri = 'https://review-planner.vercel.app/oauthcallback'
+    flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
@@ -97,8 +100,10 @@ def oauthcallback():
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
             scopes=['https://www.googleapis.com/auth/calendar.events'],
             state=state)
+        print(f"URL={flask.url_for('oauthcallback', _external=True)}")
         flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
 
+        print(f"URL2={flask.request.url}")
         authorization_response = flask.request.url
         flow.fetch_token(authorization_response=authorization_response)
 

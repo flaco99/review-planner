@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/dist/mdb5/standard/modules/37b19816109a32106d109e83bbb3c97d.min.css">
+    <link rel='stylesheet' id='roboto-subset.css-css'  href='https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/mdb5/fonts/roboto-subset.css?ver=3.9.0-update.5' type='text/css' media='all' />
+    <script
+            type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.0.0/mdb.min.js"
+    ></script>
     <meta charset="UTF-8">
-    <title>just a page</title>
+    <title>Main page</title>
 </head>
 <body>
-    <form action="/create" method="post">
-        <input type="text" name="eventname">
-        <input type="submit" value="Enter">
-    </form>
+<form action="/create" method="post">
+    <p class="fs-1">.fs-1 text</p>
+    <p class="text-start">Create a new event to review.</p>
+    <p class="text-start">Event title: </p>
+    <input type="text" name="eventname">
+    <input type="text" name="eventtime">
+    <input type="submit" value="Enter">
+
+</form>
+
+<label class="form-label" for="customRange1">Example range</label>
+<div class="range">
+    <input type="range" class="form-range" id="customRange1" />
+</div>
 </body>
 </html>
