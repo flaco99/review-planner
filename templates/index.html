@@ -5,11 +5,9 @@
     <link rel="stylesheet" href="https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/dist/mdb5/standard/modules/37b19816109a32106d109e83bbb3c97d.min.css">
     <link rel='stylesheet' id='roboto-subset.css-css'  href='https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/mdb5/fonts/roboto-subset.css?ver=3.9.0-update.5' type='text/css' media='all' />
     <meta charset="UTF-8">
-    <title>Main page</title>
+    <title>Create Event</title>
 </head>
 <body>
-<form action="/create" method="post">
-
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
@@ -44,26 +42,9 @@
                     </ul>
                 </div>
 
-
-
-<!--                <p class="text-start">Event title: </p>
-                <input type="text" name="eventname">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-                    <label class="form-check-label" for="flexSwitchCheckChecked">Avoid weekends</label>
-                </div>
-                <div id="console-event"></div>
-
-                <label class="form-label" for="customRange1">How often to review:</label>
-                <div class="range">
-                    <input type="range" class="form-range" id="customRange1" />
-                </div>
-                <input type="submit" value="Enter">
--->
-
-                <div class="col-md-7 col-lg-8">
+               <div class="col-md-7 col-lg-8">
                     <h4 class="mb-3">Create new event</h4>
-                    <form>
+                    <form action="/create" method="post">
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="eventname" class="form-label">Event title</label>
@@ -78,15 +59,15 @@
 
                         <hr class="my-4">
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-                            <label class="form-check-label" for="flexSwitchCheckChecked">Avoid weekends</label>
+                            <input class="form-check-input" type="checkbox" id="weekendswitch" name="weekendswitch" checked>
+                            <label class="form-check-label" for="weekendswitch">Avoid weekends</label>
                         </div>
                         <hr class="my-4">
                         <h4 class="mb-3"></h4>
                         <div class="col-sm-6">
-                            <label class="form-label" for="customRange1">How often to review:</label>
+                            <label class="form-label" for="freqrange">How often to review:</label>
                             <div class="range">
-                                <input type="range" class="form-range" id="customRange1" />
+                                <input type="range" class="form-range" min="1" max="4.4" step="0.1" id="freqrange" name="freqrange" />
                             </div>
                         </div>
                         <hr class="my-4">
@@ -97,7 +78,6 @@
             </div>
         </main>
     </div>
-</form>
 
 <script
         type="text/javascript"
