@@ -4,7 +4,6 @@ from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import traceback
-import datetime
 import google_auth_oauthlib.flow
 from os import environ
 import flask
@@ -14,7 +13,7 @@ import calendar
 import datetime
 
 
-def weekend_to_weekday(day: datetime.datetime) -> str:
+def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
     if it is a sunday, it converts it to the previous day (friday).
     if it is a saturday, it converts it to the next day (monday).
@@ -26,21 +25,22 @@ def weekend_to_weekday(day: datetime.datetime) -> str:
     # month = int(day[5:7])
     # day = int(day[8:10])
 
-    today = (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat() + 'Z'  # 'Z' indicates UTC time
+    today = (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat()
     weekdaynum = calendar.weekday(day.year, day.month, day.day)
+
     if weekdaynum < 5: # if its a weekday
         return day
-    elif weekdaynum == 5: # if its a saturday
+    if weekdaynum == 5: # if its a saturday
         if str(day) == today:
             return day
         newDay = day - datetime.timedelta(days=1)
-    elif weekdaynum == 6: # if its a sunday
+    if weekdaynum == 6: # if its a sunday
         if str(day) == today:
             return day
         newDay = day + datetime.timedelta(days=1)
-    newDay.strftime('%Y-%m-%d')
-    outDay = str(newDay) + day[10:]
-    return outDay
+    # newDay = newDay.strftime('%Y-%m-%d')
+    # outDay = str(newDay) + day[10:]
+    return newDay
 
 app = Flask(__name__,
             static_url_path='',
@@ -79,10 +79,6 @@ def create():
     print(eventname, desc, weekend_switch, freq_range)
    # return render_template('success.html', eventname="foo", all_links=[])
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-
-
-
     # set review events
 
     # set the first day
@@ -96,21 +92,32 @@ def create():
     all_links = []
     while daysplus < maxdays:
         event_datetime = weekend_to_weekday(day0 + datetime.timedelta(days=rounddaysplus))
-        isoformat_datetime = event_datetime.isoformat() + 'Z'
+
+        # convert to pst timezone
+        # pst_timezone = timezone('US/Pacific')
+        # event_datetime = pst_timezone.localize(event_datetime)
+        # event_datetime = event_datetime.astimezone(pst_timezone)
+
+        # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
+
+        isoformat_datetime = event_datetime.isoformat()
         # print(day)
         if weekend_switch:
-            isoformat_datetime = weekend_to_weekday(event_datetime)
+            isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
             # print(day)
 
         event = {
             'summary': eventname,
             'start': {
                 'dateTime': isoformat_datetime,
+                'timeZone': 'US/Pacific',
             },
             'end': {
                 'dateTime': isoformat_datetime,
+                'timeZone': 'US/Pacific',
             }
         }
+        print(event)
         # Call the Calendar API
         event = calendar.events().insert(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', sendNotifications=True, body=event).execute()
         all_links.append(event.get('htmlLink'))
