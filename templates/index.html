@@ -51,11 +51,13 @@
                                 <input type="text" class="form-control" id="eventname" name="eventname" placeholder="" value="">
                             </div>
 
-                            <div class="col-md-5">
+                            <div class="col-md-6">
                                 <label for="eventdescription" class="form-label">Event description</label>
                                 <input type="text" class="form-control" id="eventdescription" name="eventdescription" placeholder="">
                             </div>
                         </div>
+
+
 
                         <hr class="my-4">
                         <div class="form-check form-switch">
@@ -71,6 +73,35 @@
                             </div>
                         </div>
                         <hr class="my-4">
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label for="eventhour" class="form-label">Event time (hour)</label>
+                                <input type="text" class="form-control" id="eventhour" name="eventhour" placeholder="" value="">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="eventminute" class="form-label">Event time (minute)</label>
+                                <input type="text" class="form-control" id="eventminute" name="eventminute" placeholder="">
+                            </div>
+                        </div>
+
+                        <template>
+                            <div>
+                                <b-form-timepicker v-model="value" locale="en"></b-form-timepicker>
+                                <div class="mt-2">Value: '{{ value }}'</div>
+                            </div>
+                        </template>
+
+                        <script>
+                            export default {
+                                data() {
+                                    return {
+                                        value: ''
+                                    }
+                                }
+                            }
+                        </script>
 
                         <button class="w-100 btn btn-primary btn-lg" type="submit">Create event</button>
                     </form>

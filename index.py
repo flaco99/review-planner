@@ -101,10 +101,8 @@ def create():
         # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
 
         isoformat_datetime = event_datetime.isoformat()
-        # print(day)
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
-            # print(day)
 
         event = {
             'summary': eventname,
