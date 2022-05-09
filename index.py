@@ -11,6 +11,7 @@ from flask import render_template, request
 import json
 import calendar
 import datetime
+from datetime import time
 
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
@@ -72,11 +73,14 @@ def create():
         desc = request.form['eventdescription']
         weekend_switch = 'weekendswitch' in request.form
         freq_range = request.form['freqrange']
+        eventhour = request.form['eventhour']
+        eventminute = request.form['eventminute']
+        defaulteventtimeswitch = request.form['defaulteventtimeswitch']
     except:
         import traceback
         traceback.print_exc()
         raise
-    print(eventname, desc, weekend_switch, freq_range)
+    print(eventname, desc, weekend_switch, freq_range, eventhour, eventminute, defaulteventtimeswitch)
    # return render_template('success.html', eventname="foo", all_links=[])
 
     # set review events
@@ -91,7 +95,8 @@ def create():
     duration = 10
     all_links = []
     while daysplus < maxdays:
-        event_datetime = weekend_to_weekday(day0 + datetime.timedelta(days=rounddaysplus))
+        if weekend_switch:
+            event_datetime = weekend_to_weekday(day0 + datetime.timedelta(days=rounddaysplus))
 
         # convert to pst timezone
         # pst_timezone = timezone('US/Pacific')
@@ -99,6 +104,13 @@ def create():
         # event_datetime = event_datetime.astimezone(pst_timezone)
 
         # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
+
+        # add default feature here
+
+        eventhour = int(eventhour)
+        eventminute = int(eventminute)
+        event_datetime = event_datetime.replace(hour = eventhour)
+        event_datetime = event_datetime.replace(minute = eventminute)
 
         isoformat_datetime = event_datetime.isoformat()
         if weekend_switch:

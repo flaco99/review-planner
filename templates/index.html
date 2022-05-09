@@ -63,7 +63,9 @@
                             <label class="form-check-label" for="weekendswitch">Avoid weekends</label>
                         </div>
                         <hr class="my-4">
+
                         <h4 class="mb-3"></h4>
+
                         <div class="col-sm-6">
                             <label class="form-label" for="freqrange">How often to review:</label>
                             <div class="range">
@@ -72,47 +74,35 @@
                         </div>
                         <hr class="my-4">
 
-                        <div class="form-group row">
-                            <label class="col-form-label text-right col-lg-3 col-sm-12">Default Time</label>
-                            <div class="col-lg-4 col-md-9 col-sm-12">
-                                <div class="input-group timepicker">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">
-                                            <i class="la la-clock-o">
-                                                ::before == $0
-                                            </i>
-                                        </span>
-                                    </div>
-                                    <input class="form-control" id="kt_timepicker_3" readonly="readonly"
-                                    placeholder="Select time" type="text">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label for="eventhour" class="form-label">Event time (hour)</label>
+                                <input type="text" class="form-control" id="eventhour" name="eventhour" placeholder="" value="">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="eventminute" class="form-label">Event time (minute)</label>
+                                <input type="text" class="form-control" id="eventminute" name="eventminute" placeholder="">
+                            </div>
+                        </div>
+
+                        <h4 class="mb-3"></h4>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="defaulteventtimeswitch" name="defaulteventtimeswitch" checked>
+                                    <label class="form-check-label" for="defaulteventtimeswitch">Set default time</label>
                                 </div>
                             </div>
                         </div>
 
-
-                        <div class="row g-4">
-                            <div class="col-mb-6">
-                                <template>
-                                    <div>
-                                        <b-form-timepicker v-model="value" locale="en"></b-form-timepicker>
-                                        <div class="mt-2">Value: '{{ value }}'</div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
                         <hr class="my-4">
 
-                        <script>
-                            export default {
-                                data() {
-                                    return {
-                                        value: ''
-                                    }
-                                }
-                            }
-                        </script>
-
                         <button class="w-100 btn btn-primary btn-lg" type="submit">Create event</button>
+
+                        <h4 class="mb-5"></h4>
+
                     </form>
                 </div>
             </div>
