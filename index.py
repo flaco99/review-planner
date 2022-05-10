@@ -105,10 +105,15 @@ def create():
 
         # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
 
-        # add default feature here
-
         eventhour = int(eventhour)
         eventminute = int(eventminute)
+
+        if defaulteventtimeswitch:
+            ieventhour = eventhour
+            ieventminute = eventminute
+            # take this to index.html ?
+            # next user creates new event, the initial time in the time picker will be ieventhour and ieventminute
+
         event_datetime = event_datetime.replace(hour = eventhour)
         event_datetime = event_datetime.replace(minute = eventminute)
 
