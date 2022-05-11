@@ -75,7 +75,7 @@ def create():
         freq_range = request.form['freqrange']
         eventhour = request.form['eventhour']
         eventminute = request.form['eventminute']
-        defaulteventtimeswitch = request.form['defaulteventtimeswitch']
+        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
     except:
         import traceback
         traceback.print_exc()
