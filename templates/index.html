@@ -8,17 +8,21 @@
     <title>Create Event</title>
 </head>
 <body>
-    <div class="container">
-        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-                <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
-                <span class="fs-4">Review Planner</span>
-            </a>
-
-            <ul class="nav nav-pills">
-                <li class="nav-item"><a href="#" class="nav-link active" aria-current="page">Create event</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">About</a></li>
-            </ul>
+    <div class="container-fluid">
+        <header class="p-1 m-2 border-bottom">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light p-3 m-4">
+                <a class="navbar-brand" href="#">Navbar</a>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">About</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
         </header>
     </div>
 
@@ -73,17 +77,6 @@
                             </div>
                         </div>
                         <hr class="my-4">
-
-                        <script type="text/javascript">
-                            /*
-                            check if localStorage.getItem('eventhour') and localStorage.getItem('evenminute') have values.
-                            If yes, let Deventhour = localStorage.getItem('eventhour'). and let eventhour placeholder
-                            equal Deventhour.
-                            problem: the first time the user creates an event, localStorage.getItem('eventhour')
-                            will not be defined. but if we define it at the top of this program, it will be redefined
-                            as that every time user creates new event.
-                            */
-                        </script>
 
                         <div class="row g-3">
                             <div class="col-sm-6">
