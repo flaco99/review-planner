@@ -121,6 +121,8 @@ def create():
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
+        tagID = str(1234) #change later
+
         event = {
             'summary': eventname,
             'start': {
@@ -130,6 +132,11 @@ def create():
             'end': {
                 'dateTime': isoformat_datetime,
                 'timeZone': 'US/Pacific',
+            },
+            "extendedProperties": {
+                    "private": {
+                        "tagID": tagID
+                    }
             }
         }
         print(event)
