@@ -60,6 +60,39 @@ def home():
         return flask.redirect('authorize')
     return render_template('index.html')
 
+@app.route('/edit', methods = ['GET'])
+def edit():
+    # either here or in edit.js, get go to the user's google calendar and get info on the event that they're editting
+    return render_template('edit.html')
+
+@app.route('/apply_changes_to_all', methods = ['POST'])
+def apply_changes_to_all():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+    try:
+        eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
+                               privateExtendedProperty="tagID=4444").execute()
+
+        eventname = request.form['eventname']
+        desc = request.form['eventdescription']
+        weekend_switch = 'weekendswitch' in request.form
+        freq_range = request.form['freqrange']
+        eventhour = request.form['eventhour']
+        eventminute = request.form['eventminute']
+        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
+
+        for event in eventList["items"]:
+            print(f"AAAAAA   {event} BBBB")
+            #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
+            event['summary'] = eventname
+            updated_event = calendar.events().update(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId=event['id'], body=event).execute()
+            print(updated_event['updated'])
+    except RefreshError:
+        return flask.redirect('authorize')
+    return render_template('success.html')
+
 @app.route('/create', methods = ['POST'])
 def create():
     if 'credentials' not in flask.session:
@@ -121,7 +154,7 @@ def create():
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
-        tagID = str(1234) #change later
+        tagID = str(4444) #change later
 
         event = {
             'summary': eventname,

@@ -6,12 +6,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
 <body>
-    <p>Hello, I'm NEW</p>
+    <p>Edit the most recently created event.</p>
     <p>Event name: {{ eventname }}</p>
     <ul>
         {% for event_link in all_links %}
         <li><a href="{{ event_link }}">ev</a></li>
         {% endfor %}
     </ul>
+
+    <div class="col-md-5 col-lg-4 order-md-last">
+        <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary">Today's events:</span>
+            <span class="badge bg-primary rounded-pill">69</span>
+        </h4>
+        <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between lh-sm">
+                <div>
+                    <h6 class="my-0">Event name</h6>
+                    <small class="text-muted">Description</small>
+                </div>
+                <a class="btn btn-primary" href="/edit" role="button">Edit</a>
+            </li>
+        </ul>
+    </div>
+
 </body>
 </html>
