@@ -12,6 +12,7 @@ import json
 import calendar
 import datetime
 from datetime import time
+import uuid
 
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
@@ -72,8 +73,12 @@ def apply_changes_to_all():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     try:
+        # choose event (put more code in edit.html)
+        chosenEvent = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId='eventId').execute()
+        eventTagID = chosenEvent['summary']
+
         eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
-                               privateExtendedProperty="tagID=4444").execute()
+                               privateExtendedProperty=f"tagID={eventTagID}").execute()
 
         eventname = request.form['eventname']
         desc = request.form['eventdescription']
@@ -154,7 +159,7 @@ def create():
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
-        tagID = str(4444) #change later
+        tagID = str(uuid.uuid4())
 
         event = {
             'summary': eventname,
