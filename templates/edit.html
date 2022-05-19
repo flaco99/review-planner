@@ -48,11 +48,11 @@
                <div class="col-md-7 col-lg-8">
                     <h4 class="mb-3">Edit event</h4>
                     <a class="btn btn-primary" href="/edit" role="button">Cancel</a>
-                    <form action="/apply_changes_to_all" method="post" onsubmit="setDefaultTime()">
+                    <form action="/create" method="post" onsubmit="setDefaultTime()">
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="eventname" class="form-label">Event title</label>
-                                <input type="text" class="form-control" id="eventname" name="eventname" placeholder="" value="">
+                                <input type="text" class="form-control" id="eventname" name="eventname" placeholder=event_name value="">
                             </div>
 
                             <div class="col-md-6">

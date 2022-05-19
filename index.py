@@ -61,11 +61,6 @@ def home():
         return flask.redirect('authorize')
     return render_template('index.html')
 
-@app.route('/edit', methods = ['GET'])
-def edit():
-    # either here or in edit.js, get go to the user's google calendar and get info on the event that they're editting
-    return render_template('edit.html')
-
 @app.route('/apply_changes_to_all', methods = ['POST'])
 def apply_changes_to_all():
     if 'credentials' not in flask.session:
@@ -96,7 +91,36 @@ def apply_changes_to_all():
             print(updated_event['updated'])
     except RefreshError:
         return flask.redirect('authorize')
-    return render_template('success.html')
+    return flask.redirect(f'view_events?event_tag_id={eventTagID}')
+
+@app.route('/view_events', methods=['GET'])
+def view_events():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+    eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
+                                       privateExtendedProperty="appID=booboo").execute()
+    print(eventList)
+    event_links = [event.get('htmlLink') for event in eventList["items"]]
+    event_ids = [event.get('id') for event in eventList["items"]]
+    return render_template('success.html', all_links=event_links, event_ids=event_ids, eventname="poop")
+
+@app.route('/edit', methods=['GET'])
+def get_info_to_edit():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+
+    eventId = request.form['event_id']
+    event = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+                                  eventId=eventId).execute()
+    eventname = event['summary']
+    print(event)
+    return render_template('edit.html', event_name=eventname)
 
 @app.route('/create', methods = ['POST'])
 def create():
@@ -173,7 +197,8 @@ def create():
             },
             "extendedProperties": {
                     "private": {
-                        "tagID": tagID
+                        "tagID": tagID,
+                        "appID": "booboo"
                     }
             }
         }
@@ -186,8 +211,7 @@ def create():
         daysplus = daysplus * intervalfactor
         rounddaysplus = round(daysplus)
         duration = duration / 2
-
-    return render_template('success.html', eventname=eventname, all_links=all_links)
+    return flask.redirect('view_events')
 
 
 @app.route('/authorize')
