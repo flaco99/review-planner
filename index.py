@@ -61,6 +61,16 @@ def home():
         return flask.redirect('authorize')
     return render_template('index.html')
 
+@app.route('/about')
+def about():
+
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+
+    return render_template('about.html')
+
 @app.route('/apply_changes_to_all', methods = ['POST'])
 def apply_changes_to_all():
     if 'credentials' not in flask.session:
