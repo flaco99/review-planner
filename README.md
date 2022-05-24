@@ -7,6 +7,7 @@ set OAUTHLIB_INSECURE_TRANSPORT=1
 set FLASK_APP=index
 set FLASK_SECRET_KEY=ignored
 set FLASK_ENV=development
+set FLASK_DEBUG=1
 set /p CLIENT_SECRET_JSON=<C:\path\to\client_secret.json
 flask run
 ```

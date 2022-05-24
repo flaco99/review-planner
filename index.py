@@ -71,6 +71,32 @@ def about():
 
     return render_template('about.html')
 
+@app.route('/apply_changes_to_single', methods = ['POST'])
+def apply_changes_to_single():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+    try:
+        event = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+                                            eventId='eventId').execute()
+
+        eventname = request.form['eventname']
+        desc = request.form['eventdescription']
+        weekend_switch = 'weekendswitch' in request.form
+        freq_range = request.form['freqrange']
+        eventhour = request.form['eventhour']
+        eventminute = request.form['eventminute']
+        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
+
+        event['summary'] = eventname
+        updated_event = calendar.events().update(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+                                                     eventId=event['id'], body=event).execute()
+        print(updated_event['updated'])
+    except RefreshError:
+        return flask.redirect('authorize')
+    return flask.redirect(f'view_events?')
+
 @app.route('/apply_changes_to_all', methods = ['POST'])
 def apply_changes_to_all():
     if 'credentials' not in flask.session:
@@ -78,9 +104,13 @@ def apply_changes_to_all():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     try:
-        # choose event (put more code in edit.html)
-        chosenEvent = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId='eventId').execute()
-        eventTagID = chosenEvent['summary']
+        eventID = request.form['eventId']
+        chosenEvent = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId=eventID).execute()
+        print("AAAAAA")
+        # print(eventID)
+        print(chosenEvent['extendedProperties']['private']['tagID'])
+        print("BBBBBB")
+        eventTagID = chosenEvent['extendedProperties']['private']['tagID']
 
         eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
                                privateExtendedProperty=f"tagID={eventTagID}").execute()
@@ -125,12 +155,12 @@ def get_info_to_edit():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
 
-    eventId = request.form['event_id']
+    eventId = request.args['event_id']
     event = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
                                   eventId=eventId).execute()
     eventname = event['summary']
     print(event)
-    return render_template('edit.html', event_name=eventname)
+    return render_template('edit.html', event_name=eventname, event_id=eventId)
 
 @app.route('/create', methods = ['POST'])
 def create():
