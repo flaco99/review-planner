@@ -64,11 +64,6 @@ def home():
 @app.route('/about')
 def about():
 
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
-    credentials = Credentials(**flask.session['credentials'])
-    calendar = build("calendar", "v3", credentials=credentials)
-
     return render_template('about.html')
 
 @app.route('/apply_changes_to_single', methods = ['POST'])
@@ -140,7 +135,12 @@ def view_events():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
+    # need to set the time to 12:00 AM?
+    yesturday = datetime.datetime.today() - datetime.timedelta(days=1)
+    tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
+    eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+                                       timeMax=tomorrow.isoformat(),
+                                       timeMin=yesturday.isoformat(),
                                        privateExtendedProperty="appID=booboo").execute()
     print(eventList)
     event_links = [event.get('htmlLink') for event in eventList["items"]]
