@@ -135,14 +135,16 @@ def view_events():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    # need to set the time to 12:00 AM?
-    yesturday = datetime.datetime.today() - datetime.timedelta(days=1)
-    tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
+    # to do: need to set the time to 12:00 AM?
+    # to do: for .astimezone(datetime.timezone.utc), change to user's timezone eventually.
+    yesturday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
+    tomorrow = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
+    print(tomorrow.isoformat())
+    print(yesturday.isoformat())
     eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
                                        timeMax=tomorrow.isoformat(),
                                        timeMin=yesturday.isoformat(),
                                        privateExtendedProperty="appID=booboo").execute()
-    print(eventList)
     event_links = [event.get('htmlLink') for event in eventList["items"]]
     event_ids = [event.get('id') for event in eventList["items"]]
     return render_template('success.html', all_links=event_links, event_ids=event_ids, eventname="poop")
