@@ -73,7 +73,7 @@ def apply_changes_to_single():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     try:
-        event = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+        event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                             eventId='eventId').execute()
 
         eventname = request.form['eventname']
@@ -85,7 +85,7 @@ def apply_changes_to_single():
         defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
 
         event['summary'] = eventname
-        updated_event = calendar.events().update(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+        updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                                      eventId=event['id'], body=event).execute()
         print(updated_event['updated'])
     except RefreshError:
@@ -100,16 +100,18 @@ def apply_changes_to_all():
     calendar = build("calendar", "v3", credentials=credentials)
     try:
         eventID = request.form['eventId']
-        chosenEvent = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId=eventID).execute()
+        chosenEvent = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', eventId=eventID).execute()
         print("AAAAAA")
         # print(eventID)
         print(chosenEvent['extendedProperties']['private']['tagID'])
         print("BBBBBB")
         eventTagID = chosenEvent['extendedProperties']['private']['tagID']
 
-        # TODO: print len(eventList)
-        eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
-                               privateExtendedProperty=f"tagID={eventTagID}").execute()
+
+        eventList = calendar.events().list(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', maxResults=10).execute()
+        # eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
+        #                                privateExtendedProperty=f"tagID={eventTagID}").execute()
+        print(len(eventList['items']))
 
         eventname = request.form['eventname']
         desc = request.form['eventdescription']
@@ -123,9 +125,12 @@ def apply_changes_to_all():
             print(f"AAAAAA   {event} BBBB")
             #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
             event['summary'] = eventname
-            #TODO: print event['id'] and event
+            print('event id:')
+            print(event['id'])
+            print('event:')
+            print(event)
             # TODO verify what update() expects
-            updated_event = calendar.events().update(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId=event['id'], body=event).execute()
+            updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', eventId=event['id'], body=event).execute()
             print(updated_event['updated'])
     # TODO put this in a middleware filter or to the top of the function
     except RefreshError:
@@ -141,13 +146,14 @@ def view_events():
     calendar = build("calendar", "v3", credentials=credentials)
     # to do: need to set the time to 12:00 AM?
     # to do: for .astimezone(datetime.timezone.utc), change to user's timezone eventually.
-    yesturday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
-    tomorrow = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
-    print(tomorrow.isoformat())
-    print(yesturday.isoformat())
-    eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
-                                       timeMax=tomorrow.isoformat(),
-                                       timeMin=yesturday.isoformat(),
+
+    minday = (datetime.datetime.today() - datetime.timedelta(days=4)).astimezone(datetime.timezone.utc)
+    maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
+    print(maxday.isoformat())
+    print(minday.isoformat())
+    eventList = calendar.events().list(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
+                                       timeMax=maxday.isoformat(),
+                                       timeMin=minday.isoformat(),
                                        privateExtendedProperty="appID=booboo").execute()
     event_links = [event.get('htmlLink') for event in eventList["items"]]
     event_ids = [event.get('id') for event in eventList["items"]]
@@ -162,7 +168,7 @@ def get_info_to_edit():
     calendar = build("calendar", "v3", credentials=credentials)
 
     eventId = request.args['event_id']
-    event = calendar.events().get(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com',
+    event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                   eventId=eventId).execute()
     eventname = event['summary']
     print(event)
@@ -195,6 +201,8 @@ def create():
 
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
+
+    tagID = str(uuid.uuid4())
 
     maxdays = 360
     daysplus = 1
@@ -229,7 +237,6 @@ def create():
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
-        tagID = str(uuid.uuid4())
 
         event = {
             'summary': eventname,
@@ -250,7 +257,7 @@ def create():
         }
         print(event)
         # Call the Calendar API
-        event = calendar.events().insert(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', sendNotifications=True, body=event).execute()
+        event = calendar.events().insert(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', sendNotifications=True, body=event).execute()
         all_links.append(event.get('htmlLink'))
 
         # set to the next day
