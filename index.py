@@ -107,6 +107,7 @@ def apply_changes_to_all():
         print("BBBBBB")
         eventTagID = chosenEvent['extendedProperties']['private']['tagID']
 
+        # TODO: print len(eventList)
         eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
                                privateExtendedProperty=f"tagID={eventTagID}").execute()
 
@@ -122,8 +123,11 @@ def apply_changes_to_all():
             print(f"AAAAAA   {event} BBBB")
             #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
             event['summary'] = eventname
+            #TODO: print event['id'] and event
+            # TODO verify what update() expects
             updated_event = calendar.events().update(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', eventId=event['id'], body=event).execute()
             print(updated_event['updated'])
+    # TODO put this in a middleware filter or to the top of the function
     except RefreshError:
         return flask.redirect('authorize')
     return flask.redirect(f'view_events?event_tag_id={eventTagID}')
