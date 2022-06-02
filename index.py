@@ -201,6 +201,7 @@ def create():
 
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
+    event_datetime = day0
 
     tagID = str(uuid.uuid4())
 
@@ -230,10 +231,10 @@ def create():
             # take this to index.html ?
             # next user creates new event, the initial time in the time picker will be ieventhour and ieventminute
 
-        event_datetime = event_datetime.replace(hour = eventhour)
-        event_datetime = event_datetime.replace(minute = eventminute)
+        event_datetime = event_datetime.replace(hour=eventhour)
+        event_datetime = event_datetime.replace(minute=eventminute)
 
-        isoformat_datetime = event_datetime.isoformat()
+        isoformat_datetime = (day0 + datetime.timedelta(days=rounddaysplus)).isoformat()
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
