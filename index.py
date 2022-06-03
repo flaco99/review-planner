@@ -107,7 +107,6 @@ def apply_changes_to_all():
         print("BBBBBB")
         eventTagID = chosenEvent['extendedProperties']['private']['tagID']
 
-
         eventList = calendar.events().list(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', maxResults=10).execute()
         # eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
         #                                privateExtendedProperty=f"tagID={eventTagID}").execute()
@@ -125,10 +124,11 @@ def apply_changes_to_all():
             print(f"AAAAAA   {event} BBBB")
             #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
             event['summary'] = eventname
-            print('event id:')
-            print(event['id'])
-            print('event:')
-            print(event)
+            event['description'] = desc
+            #if weekend_switch:
+            #    event_datetime =
+            #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
+
             # TODO verify what update() expects
             updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', eventId=event['id'], body=event).execute()
             print(updated_event['updated'])
@@ -237,7 +237,6 @@ def create():
         isoformat_datetime = (day0 + datetime.timedelta(days=rounddaysplus)).isoformat()
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
-
 
         event = {
             'summary': eventname,
