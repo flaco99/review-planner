@@ -147,7 +147,7 @@ def view_events():
     # to do: need to set the time to 12:00 AM?
     # to do: for .astimezone(datetime.timezone.utc), change to user's timezone eventually.
 
-    minday = (datetime.datetime.today() - datetime.timedelta(days=4)).astimezone(datetime.timezone.utc)
+    minday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     print(maxday.isoformat())
     print(minday.isoformat())
@@ -157,7 +157,17 @@ def view_events():
                                        privateExtendedProperty="appID=booboo").execute()
     event_links = [event.get('htmlLink') for event in eventList["items"]]
     event_ids = [event.get('id') for event in eventList["items"]]
-    return render_template('success.html', all_links=event_links, event_ids=event_ids, eventname="poop")
+    event_names = [event.get('summary') for event in eventList["items"]]
+    event_descriptions = [event.get('description') for event in eventList["items"]]
+    event_list = []
+    for i in range(len(event_ids)):
+        e = []
+        e.append(event_ids[i])
+        e.append(event_names[i])
+        e.append(event_descriptions[i])
+        e.append(event_links[i])
+        event_list.append(e)
+    return render_template('success.html', event_list=event_list, num_events=len(event_list))
 
 @app.route('/edit', methods=['GET'])
 def get_info_to_edit():
@@ -170,9 +180,13 @@ def get_info_to_edit():
     eventId = request.args['event_id']
     event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                   eventId=eventId).execute()
-    eventname = event['summary']
-    print(event)
-    return render_template('edit.html', event_name=eventname, event_id=eventId)
+    event_dict = {'id': eventId,
+                  'name': event['summary'],
+                  # TODO what if description is blank (None) ?
+                  'description': event['description'],
+                  'hour': 1}
+    # print(event['start.dateTime'])
+    return render_template('edit.html', event_dict=event_dict)
 
 @app.route('/create', methods = ['POST'])
 def create():
