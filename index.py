@@ -51,6 +51,7 @@ app.secret_key = environ["FLASK_SECRET_KEY"]
 
 @app.route('/')
 def home():
+    # TODO copy all of this and put it in to all the app routes (change return render_template('index.html') to the correct html file)
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
     credentials = Credentials(**flask.session['credentials'])
@@ -180,12 +181,17 @@ def get_info_to_edit():
     eventId = request.args['event_id']
     event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                   eventId=eventId).execute()
+    # TODO what if the summary/description/etc is blank (None) ? in html, if user doesn't fill it out make it automatically "Untitled1" or smth
+    datetime_str = event['start']['dateTime']
+    # TODO make it match the user's timezone
+    if datetime_str[11] == '0':
+        hour = datetime_str[12]
+    else:
+        hour = datetime_str[11] + datetime_str[12]
     event_dict = {'id': eventId,
                   'name': event['summary'],
-                  # TODO what if description is blank (None) ?
                   'description': event['description'],
-                  'hour': 1}
-    # print(event['start.dateTime'])
+                  'hour': hour}
     return render_template('edit.html', event_dict=event_dict)
 
 @app.route('/create', methods = ['POST'])
