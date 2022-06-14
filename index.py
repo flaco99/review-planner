@@ -86,6 +86,18 @@ def apply_changes_to_single():
         defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
 
         event['summary'] = eventname
+        event['description'] = desc
+        if len(eventhour) == 1:
+            eventhour = '0' + eventhour
+        if len(eventminute) == 1:
+            eventminute = '0' + eventminute
+        print('before:')
+        print(event['start']['dateTime'])
+        new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
+        event['start']['dateTime'] = new_datetime
+        event['end']['dateTime'] = new_datetime
+        print('after:')
+        print(event['start']['dateTime'])
         updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
                                                      eventId=event['id'], body=event).execute()
         print(updated_event['updated'])
@@ -188,10 +200,16 @@ def get_info_to_edit():
         hour = datetime_str[12]
     else:
         hour = datetime_str[11] + datetime_str[12]
+    if datetime_str[14] == '0':
+        minute = datetime_str[15]
+    else:
+        minute = datetime_str[14] + datetime_str[15]
+    print(hour)
     event_dict = {'id': eventId,
                   'name': event['summary'],
                   'description': event['description'],
-                  'hour': hour}
+                  'hour': hour,
+                  'minute': minute}
     return render_template('edit.html', event_dict=event_dict)
 
 @app.route('/create', methods = ['POST'])

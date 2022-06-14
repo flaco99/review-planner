@@ -28,11 +28,11 @@
                    <div class="row g-3">
                        <div class="col-sm-6">
                            <label for="eventname" class="form-label">Event title</label>
-                           <input type="text" class="form-control" id="eventname" name="eventname" placeholder="" value="{{event_dict['name']}}">
+                           <input type="text" class="form-control" id="eventname" name="eventname" value="{{event_dict['name']}}">
                        </div>
                        <div class="col-md-6">
                            <label for="eventdescription" class="form-label">Event description</label>
-                           <input type="text" class="form-control" id="eventdescription" name="eventdescription" placeholder="" value="{{event_dict['description']}}">
+                           <input type="text" class="form-control" id="eventdescription" name="eventdescription" value="{{event_dict['description']}}">
                        </div>
                    </div>
                    <hr class="my-4">
@@ -61,11 +61,11 @@
                    <div class="row g-3">
                        <div class="col-sm-6">
                            <label for="eventhour" class="form-label">Event time (hour)</label>
-                           <input type="text" class="form-control" id="eventhour" name="eventhour" placeholder="1" value="1">
+                           <input type="text" class="form-control" id="eventhour" name="eventhour" value="{{event_dict['hour']}}">
                        </div>
                        <div class="col-md-6">
                            <label for="eventminute" class="form-label">Event time (minute)</label>
-                           <input type="text" class="form-control" id="eventminute" name="eventminute" placeholder="0" value="0">
+                           <input type="text" class="form-control" id="eventminute" name="eventminute" value="{{event_dict['minute']}}">
                        </div>
                    </div>
                    <h4 class="mb-3"></h4>
@@ -94,12 +94,10 @@
            </div>
         </div>
     </div>
-
 <script
         type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.0.0/mdb.min.js"
 ></script>
 <script type="text/javascript" src="/edit.js"></script>
-<script type="text/javascript" src="/index.js"></script>
 </body>
 </html>

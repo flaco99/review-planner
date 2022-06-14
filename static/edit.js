@@ -2,3 +2,9 @@
 
 // localStorage.setItem('event_hour',document.querySelector("#eventhour").value);
 // like this but without using local storage.
+
+function setDefaultTime(){
+    if (document.querySelector("#defaulteventtimeswitch").checked) {
+    localStorage.setItem('event_hour',document.querySelector("#eventhour").value);
+    }
+}
