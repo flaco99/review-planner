@@ -23,7 +23,7 @@
            <div class="col-lg-12">
                <a class="btn btn-outline-primary" href="/view_events" role="button">Cancel</a>
                <h4 class="mb-3"></h4>
-               <form action="/apply_changes_to_all" method="post" onsubmit="setDefaultTime()">
+               <form id="applyChangesForm" action="/apply_changes_to_single" method="post" onsubmit="setDefaultTime()">
                    <input type="hidden" name="eventId" value="{{event_dict['id']}}">
                    <div class="row g-3">
                        <div class="col-sm-6">
@@ -86,7 +86,7 @@
                            <button class="w-100 btn btn-primary btn-lg" type="submit">Apply changes</button>
                        </div>
                        <div class="col-sm-6">
-                           <button class="w-100 btn btn-primary btn-lg" type="submit">Apply changes to all</button>
+                           <button class="w-100 btn btn-primary btn-lg" type="submit" onclick="changeFormAction()">Apply changes to all</button>
                        </div>
                    </div>
                    <h4 class="mb-5"></h4>

@@ -73,6 +73,65 @@ def about():
 # put an if statement to decide whether to apply changes to single event or to all events.
 # (choose according to the values from the edit.html form)
 
+@app.route('/apply_changes', methods = ['POST'])
+def apply_changes():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    credentials = Credentials(**flask.session['credentials'])
+    calendar = build("calendar", "v3", credentials=credentials)
+    try:
+        # get info from form
+        eventID = request.form['eventId']
+        eventname = request.form['eventname']
+        desc = request.form['eventdescription']
+        weekend_switch = 'weekendswitch' in request.form
+        freq_range = request.form['freqrange']
+        eventhour = request.form['eventhour']
+        eventminute = request.form['eventminute']
+        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
+        # get rid of zero before digit if necessary
+        if len(eventhour) == 1:
+            eventhour = '0' + eventhour
+        if len(eventminute) == 1:
+            eventminute = '0' + eventminute
+
+        # get the base event
+        event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                          eventId=eventID).execute()
+
+        # if value of button == single_event:
+        event['summary'] = eventname
+        event['description'] = desc
+        new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
+        event['start']['dateTime'] = new_datetime
+        event['end']['dateTime'] = new_datetime
+        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                                     eventId=event['id'], body=event).execute()
+        print(updated_event['updated'])
+
+        # if value of button == all_events:
+        eventTagID = event['extendedProperties']['private']['tagID']
+        eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
+                                        privateExtendedProperty=f"tagID={eventTagID}").execute()
+        print(len(eventList['items']))
+
+        for event in eventList["items"]:
+            print(f"AAAAAA   {event} BBBB")
+            # event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
+            event['summary'] = eventname
+            event['description'] = desc
+            # if weekend_switch:
+            #    event_datetime =
+            #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
+
+            # TODO verify what update() expects
+            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                                     eventId=event['id'], body=event).execute()
+            print(updated_event['updated'])
+        # TODO put this in a middleware filter or to the top of the function
+    except RefreshError:
+        return flask.redirect('authorize')
+    return flask.redirect(f'view_events?')
 
 @app.route('/apply_changes_to_single', methods = ['POST'])
 def apply_changes_to_single():
@@ -81,9 +140,9 @@ def apply_changes_to_single():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     try:
-        event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
-                                            eventId='eventId').execute()
-
+        eventID = request.form['eventId']
+        event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                            eventId=eventID).execute()
         eventname = request.form['eventname']
         desc = request.form['eventdescription']
         weekend_switch = 'weekendswitch' in request.form
@@ -105,7 +164,7 @@ def apply_changes_to_single():
         event['end']['dateTime'] = new_datetime
         print('after:')
         print(event['start']['dateTime'])
-        updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
+        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                                      eventId=event['id'], body=event).execute()
         print(updated_event['updated'])
     except RefreshError:
@@ -120,17 +179,18 @@ def apply_changes_to_all():
     calendar = build("calendar", "v3", credentials=credentials)
     try:
         eventID = request.form['eventId']
-        chosenEvent = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', eventId=eventID).execute()
+        chosenEvent = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', eventId=eventID).execute()
         print("AAAAAA")
         # print(eventID)
-        print(chosenEvent['extendedProperties']['private']['tagID'])
+        print(f"$$$${chosenEvent['extendedProperties']['private']['tagID']}$$$")
         print("BBBBBB")
         eventTagID = chosenEvent['extendedProperties']['private']['tagID']
 
-        eventList = calendar.events().list(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', maxResults=10).execute()
-        # eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
-        #                                privateExtendedProperty=f"tagID={eventTagID}").execute()
+        eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', maxResults=10,
+                                           privateExtendedProperty=f"tagID={eventTagID}").execute()
         print(len(eventList['items']))
+        for e in eventList['items']:
+            print(f"***{e['extendedProperties']['private']['tagID']}***")
 
         eventname = request.form['eventname']
         desc = request.form['eventdescription']
@@ -150,7 +210,7 @@ def apply_changes_to_all():
             #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
             # TODO verify what update() expects
-            updated_event = calendar.events().update(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', eventId=event['id'], body=event).execute()
+            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', eventId=event['id'], body=event).execute()
             print(updated_event['updated'])
     # TODO put this in a middleware filter or to the top of the function
     except RefreshError:
@@ -171,7 +231,7 @@ def view_events():
     maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     print(maxday.isoformat())
     print(minday.isoformat())
-    eventList = calendar.events().list(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
+    eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                        timeMax=maxday.isoformat(),
                                        timeMin=minday.isoformat(),
                                        privateExtendedProperty="appID=booboo").execute()
@@ -198,7 +258,7 @@ def get_info_to_edit():
     calendar = build("calendar", "v3", credentials=credentials)
 
     eventId = request.args['event_id']
-    event = calendar.events().get(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com',
+    event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                   eventId=eventId).execute()
     # TODO what if the summary/description/etc is blank (None) ? in html, if user doesn't fill it out make it automatically "Untitled1" or smth
     datetime_str = event['start']['dateTime']
@@ -302,7 +362,7 @@ def create():
         }
         print(event)
         # Call the Calendar API
-        event = calendar.events().insert(calendarId='79300fi682k4ibhmoncaf857a4@group.calendar.google.com', sendNotifications=True, body=event).execute()
+        event = calendar.events().insert(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', sendNotifications=True, body=event).execute()
         all_links.append(event.get('htmlLink'))
 
         # set to the next day

@@ -8,3 +8,7 @@ function setDefaultTime(){
     localStorage.setItem('event_hour',document.querySelector("#eventhour").value);
     }
 }
+
+function changeFormAction() {
+    document.querySelector("#applyChangesForm").action = "/apply_changes_to_all";
+}
