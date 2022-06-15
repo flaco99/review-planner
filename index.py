@@ -67,6 +67,13 @@ def about():
 
     return render_template('about.html')
 
+
+# combine apply_changes_to_single and apply_changes_to_all into one app route / function.
+# in edit.html, add values to the 2 submit buttons ([apply changes], [apply changes to all])
+# put an if statement to decide whether to apply changes to single event or to all events.
+# (choose according to the values from the edit.html form)
+
+
 @app.route('/apply_changes_to_single', methods = ['POST'])
 def apply_changes_to_single():
     if 'credentials' not in flask.session:
@@ -233,7 +240,6 @@ def create():
         traceback.print_exc()
         raise
     print(eventname, desc, weekend_switch, freq_range, eventhour, eventminute, defaulteventtimeswitch)
-   # return render_template('success.html', eventname="foo", all_links=[])
 
     # set review events
 
@@ -278,6 +284,7 @@ def create():
 
         event = {
             'summary': eventname,
+            'description': desc,
             'start': {
                 'dateTime': isoformat_datetime,
                 'timeZone': 'US/Pacific',
