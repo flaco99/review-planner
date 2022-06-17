@@ -67,72 +67,6 @@ def about():
 
     return render_template('about.html')
 
-
-# combine apply_changes_to_single and apply_changes_to_all into one app route / function.
-# in edit.html, add values to the 2 submit buttons ([apply changes], [apply changes to all])
-# put an if statement to decide whether to apply changes to single event or to all events.
-# (choose according to the values from the edit.html form)
-
-@app.route('/apply_changes', methods = ['POST'])
-def apply_changes():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
-    credentials = Credentials(**flask.session['credentials'])
-    calendar = build("calendar", "v3", credentials=credentials)
-    try:
-        # get info from form
-        eventID = request.form['eventId']
-        eventname = request.form['eventname']
-        desc = request.form['eventdescription']
-        weekend_switch = 'weekendswitch' in request.form
-        freq_range = request.form['freqrange']
-        eventhour = request.form['eventhour']
-        eventminute = request.form['eventminute']
-        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
-        # get rid of zero before digit if necessary
-        if len(eventhour) == 1:
-            eventhour = '0' + eventhour
-        if len(eventminute) == 1:
-            eventminute = '0' + eventminute
-
-        # get the base event
-        event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                          eventId=eventID).execute()
-
-        # if value of button == single_event:
-        event['summary'] = eventname
-        event['description'] = desc
-        new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
-        event['start']['dateTime'] = new_datetime
-        event['end']['dateTime'] = new_datetime
-        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                                     eventId=event['id'], body=event).execute()
-        print(updated_event['updated'])
-
-        # if value of button == all_events:
-        eventTagID = event['extendedProperties']['private']['tagID']
-        eventList = calendar.events().list(calendarId='votusm3rk7umll40ikri89ruu0@group.calendar.google.com', maxResults=10,
-                                        privateExtendedProperty=f"tagID={eventTagID}").execute()
-        print(len(eventList['items']))
-
-        for event in eventList["items"]:
-            print(f"AAAAAA   {event} BBBB")
-            # event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
-            event['summary'] = eventname
-            event['description'] = desc
-            # if weekend_switch:
-            #    event_datetime =
-            #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
-
-            # TODO verify what update() expects
-            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                                     eventId=event['id'], body=event).execute()
-            print(updated_event['updated'])
-        # TODO put this in a middleware filter or to the top of the function
-    except RefreshError:
-        return flask.redirect('authorize')
-    return flask.redirect(f'view_events?')
-
 @app.route('/apply_changes_to_single', methods = ['POST'])
 def apply_changes_to_single():
     if 'credentials' not in flask.session:
@@ -165,7 +99,7 @@ def apply_changes_to_single():
         print('after:')
         print(event['start']['dateTime'])
         updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                                     eventId=event['id'], body=event).execute()
+                                                 eventId=event['id'], body=event).execute()
         print(updated_event['updated'])
     except RefreshError:
         return flask.redirect('authorize')
@@ -199,18 +133,32 @@ def apply_changes_to_all():
         eventhour = request.form['eventhour']
         eventminute = request.form['eventminute']
         defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
+        # defaulteventtimeswitch is redundant here.?
 
         for event in eventList["items"]:
             print(f"AAAAAA   {event} BBBB")
             #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
             event['summary'] = eventname
             event['description'] = desc
-            #if weekend_switch:
+            # if weekend_switch:
             #    event_datetime =
             #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
+            # if freq_range is changed:
+            #    delete all events with tagID=eventTagID, and create new set of events with new frequency
+
+            if len(eventhour) == 1:
+                eventhour = '0' + eventhour
+            if len(eventminute) == 1:
+                eventminute = '0' + eventminute
+            # TODO get a better way to convert datetime
+            new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
+            event['start']['dateTime'] = new_datetime
+            event['end']['dateTime'] = new_datetime
+
             # TODO verify what update() expects
-            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', eventId=event['id'], body=event).execute()
+            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                                     eventId=event['id'], body=event).execute()
             print(updated_event['updated'])
     # TODO put this in a middleware filter or to the top of the function
     except RefreshError:
