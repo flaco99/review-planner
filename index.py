@@ -49,125 +49,117 @@ app = Flask(__name__,
             static_folder='static/')
 app.secret_key = environ["FLASK_SECRET_KEY"]
 
-@app.route('/')
-def home():
-    # TODO copy all of this and put it in to all the app routes (change return render_template('index.html') to the correct html file)
+def verify_auth():
     if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+        raise RefreshError("no 'credentials' in session")
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
+    calendar.events().list(calendarId='primary', maxResults=10).execute()
+    calendar.settings().get(setting='timezone').execute()
+
+@app.route('/')
+def home():
+    # import pdb
+    # pdb.set_trace()
     try:
-        calendar.events().list(calendarId='primary', maxResults=10).execute()
+        verify_auth()
     except RefreshError:
         return flask.redirect('authorize')
     return render_template('index.html')
 
 @app.route('/about')
 def about():
-
+    try:
+        verify_auth()
+    except RefreshError:
+        return flask.redirect('authorize')
     return render_template('about.html')
 
 @app.route('/apply_changes_to_single', methods = ['POST'])
 def apply_changes_to_single():
-    if 'credentials' not in flask.session:
+    try:
+        verify_auth()
+    except RefreshError:
         return flask.redirect('authorize')
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    try:
-        eventID = request.form['eventId']
-        event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                            eventId=eventID).execute()
-        eventname = request.form['eventname']
-        desc = request.form['eventdescription']
-        weekend_switch = 'weekendswitch' in request.form
-        freq_range = request.form['freqrange']
-        eventhour = request.form['eventhour']
-        eventminute = request.form['eventminute']
-        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
+    timezone = calendar.settings().get(setting="timezone").execute()
+    eventID = request.form['eventId']
+    event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                  eventId=eventID).execute()
+    eventname = request.form['eventname']
+    desc = request.form['eventdescription']
+    weekend_switch = 'weekendswitch' in request.form
+    eventhour = request.form['eventhour']
+    eventminute = request.form['eventminute']
 
-        event['summary'] = eventname
-        event['description'] = desc
-        if len(eventhour) == 1:
-            eventhour = '0' + eventhour
-        if len(eventminute) == 1:
-            eventminute = '0' + eventminute
-        print('before:')
-        print(event['start']['dateTime'])
-        new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
-        event['start']['dateTime'] = new_datetime
-        event['end']['dateTime'] = new_datetime
-        print('after:')
-        print(event['start']['dateTime'])
-        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                                 eventId=event['id'], body=event).execute()
-        print(updated_event['updated'])
-    except RefreshError:
-        return flask.redirect('authorize')
+    event['summary'] = eventname
+    event['description'] = desc
+    if len(eventhour) == 1:
+        eventhour = '0' + eventhour
+    if len(eventminute) == 1:
+        eventminute = '0' + eventminute
+    new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
+    event['start']['dateTime'] = new_datetime
+    event['start']['timeZone'] = timezone['value']
+    event['end']['dateTime'] = new_datetime
+    event['end']['timeZone'] = timezone['value']
+    updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                             eventId=event['id'], body=event).execute()
+    print(updated_event['updated'])
     return flask.redirect(f'view_events?')
 
 @app.route('/apply_changes_to_all', methods = ['POST'])
 def apply_changes_to_all():
-    if 'credentials' not in flask.session:
+    try:
+        verify_auth()
+    except RefreshError:
         return flask.redirect('authorize')
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    try:
-        eventID = request.form['eventId']
-        chosenEvent = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', eventId=eventID).execute()
-        print("AAAAAA")
-        # print(eventID)
-        print(f"$$$${chosenEvent['extendedProperties']['private']['tagID']}$$$")
-        print("BBBBBB")
-        eventTagID = chosenEvent['extendedProperties']['private']['tagID']
+    timezone = calendar.settings().get(setting="timezone").execute()
+    eventID = request.form['eventId']
+    chosenEvent = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                        eventId=eventID).execute()
+    eventTagID = chosenEvent['extendedProperties']['private']['tagID']
+    eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', maxResults=10,
+                                       privateExtendedProperty=f"tagID={eventTagID}").execute()
+    eventname = request.form['eventname']
+    desc = request.form['eventdescription']
+    weekend_switch = 'weekendswitch' in request.form
+    eventhour = request.form['eventhour']
+    eventminute = request.form['eventminute']
 
-        eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', maxResults=10,
-                                           privateExtendedProperty=f"tagID={eventTagID}").execute()
-        print(len(eventList['items']))
-        for e in eventList['items']:
-            print(f"***{e['extendedProperties']['private']['tagID']}***")
+    for event in eventList["items"]:
+        event['summary'] = eventname
+        event['description'] = desc
+        # if weekend_switch:
+        #    event_datetime =
+        #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
 
-        eventname = request.form['eventname']
-        desc = request.form['eventdescription']
-        weekend_switch = 'weekendswitch' in request.form
-        freq_range = request.form['freqrange']
-        eventhour = request.form['eventhour']
-        eventminute = request.form['eventminute']
-        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
-        # defaulteventtimeswitch is redundant here.?
+        if len(eventhour) == 1:
+            eventhour = '0' + eventhour
+        if len(eventminute) == 1:
+            eventminute = '0' + eventminute
+        # TODO get a better way to convert datetime
+        new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
+        event['start']['dateTime'] = new_datetime
+        # event['start']['timeZone'] = timezone['value']
+        event['end']['dateTime'] = new_datetime
+        # event['end']['timeZone'] = timezone['value']
 
-        for event in eventList["items"]:
-            print(f"AAAAAA   {event} BBBB")
-            #event = calendar.events().get(calendarId='primary', eventId='eventId').execute()
-            event['summary'] = eventname
-            event['description'] = desc
-            # if weekend_switch:
-            #    event_datetime =
-            #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
+        # TODO verify what update() expects
+        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+                                                 eventId=event['id'], body=event).execute()
+        print(updated_event['updated'])
 
-            # if freq_range is changed:
-            #    delete all events with tagID=eventTagID, and create new set of events with new frequency
-
-            if len(eventhour) == 1:
-                eventhour = '0' + eventhour
-            if len(eventminute) == 1:
-                eventminute = '0' + eventminute
-            # TODO get a better way to convert datetime
-            new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
-            event['start']['dateTime'] = new_datetime
-            event['end']['dateTime'] = new_datetime
-
-            # TODO verify what update() expects
-            updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
-                                                     eventId=event['id'], body=event).execute()
-            print(updated_event['updated'])
-    # TODO put this in a middleware filter or to the top of the function
-    except RefreshError:
-        return flask.redirect('authorize')
     return flask.redirect(f'view_events?event_tag_id={eventTagID}')
 
 @app.route('/view_events', methods=['GET'])
 def view_events():
-    if 'credentials' not in flask.session:
+    try:
+        verify_auth()
+    except RefreshError:
         return flask.redirect('authorize')
 
     credentials = Credentials(**flask.session['credentials'])
@@ -199,7 +191,9 @@ def view_events():
 
 @app.route('/edit', methods=['GET'])
 def get_info_to_edit():
-    if 'credentials' not in flask.session:
+    try:
+        verify_auth()
+    except RefreshError:
         return flask.redirect('authorize')
 
     credentials = Credentials(**flask.session['credentials'])
@@ -229,24 +223,22 @@ def get_info_to_edit():
 
 @app.route('/create', methods = ['POST'])
 def create():
-    if 'credentials' not in flask.session:
+    try:
+        verify_auth()
+    except RefreshError:
         return flask.redirect('authorize')
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
+    timezone = calendar.settings().get(setting="timezone").execute()
 
-    try:
-        eventname = request.form['eventname']
-        desc = request.form['eventdescription']
-        weekend_switch = 'weekendswitch' in request.form
-        freq_range = request.form['freqrange']
-        eventhour = request.form['eventhour']
-        eventminute = request.form['eventminute']
-        defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
-    except:
-        import traceback
-        traceback.print_exc()
-        raise
+    eventname = request.form['eventname']
+    desc = request.form['eventdescription']
+    weekend_switch = 'weekendswitch' in request.form
+    freq_range = request.form['freqrange']
+    eventhour = request.form['eventhour']
+    eventminute = request.form['eventminute']
+    defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
     print(eventname, desc, weekend_switch, freq_range, eventhour, eventminute, defaulteventtimeswitch)
 
     # set review events
@@ -295,11 +287,11 @@ def create():
             'description': desc,
             'start': {
                 'dateTime': isoformat_datetime,
-                'timeZone': 'US/Pacific',
+                'timeZone': timezone['value'],
             },
             'end': {
                 'dateTime': isoformat_datetime,
-                'timeZone': 'US/Pacific',
+                'timeZone': timezone['value'],
             },
             "extendedProperties": {
                     "private": {
@@ -319,12 +311,11 @@ def create():
         duration = duration / 2
     return flask.redirect('view_events')
 
-
 @app.route('/authorize')
 def authorize():
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
         client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
-        scopes=['https://www.googleapis.com/auth/calendar.events'])
+        scopes=['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.settings.readonly'])
     flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
@@ -341,7 +332,7 @@ def oauthcallback():
         state = flask.session['state']
         flow = google_auth_oauthlib.flow.Flow.from_client_config(
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
-            scopes=['https://www.googleapis.com/auth/calendar.events'],
+            scopes=['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.settings.readonly'],
             state=state)
         print(f"URL={flask.url_for('oauthcallback', _external=True)}")
         flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
@@ -367,7 +358,3 @@ def oauthcallback():
     except Exception as e:
         print(traceback.format_exc())
         raise e
-
-@app.route('/portfolio')
-def portfolio():
-    return 'Portfolio Page Route'
