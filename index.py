@@ -11,9 +11,19 @@ from flask import render_template, request
 import json
 import calendar
 import datetime
-from datetime import time
 import uuid
+import pytz
 
+def convert_datetime_timezone(dt, tz1, tz2):
+    tz1 = pytz.timezone(tz1)
+    tz2 = pytz.timezone(tz2)
+
+    dt = datetime.datetime.strptime(dt,"%Y-%m-%d %H:%M:%S")
+    dt = tz1.localize(dt)
+    dt = dt.astimezone(tz2)
+    dt = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    return dt
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
@@ -83,7 +93,7 @@ def apply_changes_to_single():
         return flask.redirect('authorize')
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    timezone = calendar.settings().get(setting="timezone").execute()
+    timeZone = calendar.settings().get(setting="timezone").execute()
     eventID = request.form['eventId']
     event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                   eventId=eventID).execute()
@@ -101,9 +111,9 @@ def apply_changes_to_single():
         eventminute = '0' + eventminute
     new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
     event['start']['dateTime'] = new_datetime
-    event['start']['timeZone'] = timezone['value']
+    event['start']['timeZone'] = timeZone['value']
     event['end']['dateTime'] = new_datetime
-    event['end']['timeZone'] = timezone['value']
+    event['end']['timeZone'] = timeZone['value']
     updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                              eventId=event['id'], body=event).execute()
     print(updated_event['updated'])
@@ -117,7 +127,7 @@ def apply_changes_to_all():
         return flask.redirect('authorize')
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    timezone = calendar.settings().get(setting="timezone").execute()
+    timeZone = calendar.settings().get(setting="timezone").execute()
     eventID = request.form['eventId']
     chosenEvent = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
                                         eventId=eventID).execute()
@@ -144,9 +154,9 @@ def apply_changes_to_all():
         # TODO get a better way to convert datetime
         new_datetime = event['start']['dateTime'][:11] + eventhour + ':' + eventminute + event['start']['dateTime'][16:]
         event['start']['dateTime'] = new_datetime
-        # event['start']['timeZone'] = timezone['value']
+        event['start']['timeZone'] = timeZone['value']
         event['end']['dateTime'] = new_datetime
-        # event['end']['timeZone'] = timezone['value']
+        event['end']['timeZone'] = timeZone['value']
 
         # TODO verify what update() expects
         updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
@@ -165,7 +175,6 @@ def view_events():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     # to do: need to set the time to 12:00 AM?
-    # to do: for .astimezone(datetime.timezone.utc), change to user's timezone eventually.
 
     minday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
@@ -205,6 +214,18 @@ def get_info_to_edit():
     # TODO what if the summary/description/etc is blank (None) ? in html, if user doesn't fill it out make it automatically "Untitled1" or smth
     datetime_str = event['start']['dateTime']
     # TODO make it match the user's timezone
+
+    # convert to pst timezone
+    # pst_timezone = timezone('US/Pacific')
+    # event_datetime = pst_timezone.localize(event_datetime)
+    # event_datetime = event_datetime.astimezone(timezone(timeZone['value']))
+
+    # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
+    #
+    print('datetime_str:')
+    print(datetime_str)
+    # print(convert_datetime_timezone("2017-05-13 14:56:32", "Europe/Berlin", timeZone['value']))
+
     if datetime_str[11] == '0':
         hour = datetime_str[12]
     else:
@@ -213,7 +234,6 @@ def get_info_to_edit():
         minute = datetime_str[15]
     else:
         minute = datetime_str[14] + datetime_str[15]
-    print(hour)
     event_dict = {'id': eventId,
                   'name': event['summary'],
                   'description': event['description'],
@@ -230,7 +250,7 @@ def create():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    timezone = calendar.settings().get(setting="timezone").execute()
+    timeZone = calendar.settings().get(setting="timezone").execute()
 
     eventname = request.form['eventname']
     desc = request.form['eventdescription']
@@ -241,11 +261,10 @@ def create():
     defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
     print(eventname, desc, weekend_switch, freq_range, eventhour, eventminute, defaulteventtimeswitch)
 
-    # set review events
-
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
     event_datetime = day0
+    print(event_datetime)
 
     tagID = str(uuid.uuid4())
 
@@ -253,45 +272,32 @@ def create():
     daysplus = 1
     rounddaysplus = 1
     intervalfactor = float(freq_range)
-    duration = 10
     all_links = []
     while daysplus < maxdays:
         if weekend_switch:
             event_datetime = weekend_to_weekday(day0 + datetime.timedelta(days=rounddaysplus))
-
-        # convert to pst timezone
-        # pst_timezone = timezone('US/Pacific')
-        # event_datetime = pst_timezone.localize(event_datetime)
-        # event_datetime = event_datetime.astimezone(pst_timezone)
-
-        # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
-
         eventhour = int(eventhour)
         eventminute = int(eventminute)
-
-        if defaulteventtimeswitch:
-            ieventhour = eventhour
-            ieventminute = eventminute
-            # take this to index.html ?
-            # next user creates new event, the initial time in the time picker will be ieventhour and ieventminute
-
         event_datetime = event_datetime.replace(hour=eventhour)
         event_datetime = event_datetime.replace(minute=eventminute)
+        print(event_datetime)
 
         isoformat_datetime = (day0 + datetime.timedelta(days=rounddaysplus)).isoformat()
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
+
+        print(isoformat_datetime)
 
         event = {
             'summary': eventname,
             'description': desc,
             'start': {
                 'dateTime': isoformat_datetime,
-                'timeZone': timezone['value'],
+                'timeZone': timeZone['value'],
             },
             'end': {
                 'dateTime': isoformat_datetime,
-                'timeZone': timezone['value'],
+                'timeZone': timeZone['value'],
             },
             "extendedProperties": {
                     "private": {
@@ -308,7 +314,6 @@ def create():
         # set to the next day
         daysplus = daysplus * intervalfactor
         rounddaysplus = round(daysplus)
-        duration = duration / 2
     return flask.redirect('view_events')
 
 @app.route('/authorize')
