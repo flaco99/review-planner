@@ -14,17 +14,6 @@ import datetime
 import uuid
 import pytz
 
-def convert_datetime_timezone(dt, tz1, tz2):
-    tz1 = pytz.timezone(tz1)
-    tz2 = pytz.timezone(tz2)
-
-    dt = datetime.datetime.strptime(dt,"%Y-%m-%d %H:%M:%S")
-    dt = tz1.localize(dt)
-    dt = dt.astimezone(tz2)
-    dt = dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    return dt
-
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
     if it is a sunday, it converts it to the previous day (friday).
@@ -207,6 +196,7 @@ def get_info_to_edit():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
+    timeZone = calendar.settings().get(setting="timezone").execute()
 
     eventId = request.args['event_id']
     event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
@@ -215,16 +205,8 @@ def get_info_to_edit():
     datetime_str = event['start']['dateTime']
     # TODO make it match the user's timezone
 
-    # convert to pst timezone
-    # pst_timezone = timezone('US/Pacific')
-    # event_datetime = pst_timezone.localize(event_datetime)
-    # event_datetime = event_datetime.astimezone(timezone(timeZone['value']))
-
-    # later, get the user's local defult timezone in their google calendar and convert it to their timezone.
-    #
     print('datetime_str:')
     print(datetime_str)
-    # print(convert_datetime_timezone("2017-05-13 14:56:32", "Europe/Berlin", timeZone['value']))
 
     if datetime_str[11] == '0':
         hour = datetime_str[12]
