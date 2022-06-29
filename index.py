@@ -14,6 +14,8 @@ import datetime
 import uuid
 import pytz
 
+CAL_ID = 'primary'
+
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
     if it is a sunday, it converts it to the previous day (friday).
@@ -21,10 +23,6 @@ def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     if it is the same day that the event was created,
     the function returns the day that the event was created.
     returns the day in google calendar form.'''
-    # dayL = [int(Day[0:4]),int(Day[5:7]),int(Day[8:10])]
-    # year = int(day[0:4])
-    # month = int(day[5:7])
-    # day = int(day[8:10])
 
     today = (datetime.datetime.today() - datetime.timedelta(days=1)).isoformat()
     weekdaynum = calendar.weekday(day.year, day.month, day.day)
@@ -39,8 +37,6 @@ def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
         if str(day) == today:
             return day
         newDay = day + datetime.timedelta(days=1)
-    # newDay = newDay.strftime('%Y-%m-%d')
-    # outDay = str(newDay) + day[10:]
     return newDay
 
 app = Flask(__name__,
@@ -54,6 +50,7 @@ def verify_auth():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     calendar.events().list(calendarId='primary', maxResults=10).execute()
+    # verify we can use the settings API
     calendar.settings().get(setting='timezone').execute()
 
 @app.route('/')
@@ -84,11 +81,10 @@ def apply_changes_to_single():
     calendar = build("calendar", "v3", credentials=credentials)
     timeZone = calendar.settings().get(setting="timezone").execute()
     eventID = request.form['eventId']
-    event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+    event = calendar.events().get(calendarId=CAL_ID,
                                   eventId=eventID).execute()
     eventname = request.form['eventname']
     desc = request.form['eventdescription']
-    weekend_switch = 'weekendswitch' in request.form
     eventhour = request.form['eventhour']
     eventminute = request.form['eventminute']
 
@@ -103,9 +99,9 @@ def apply_changes_to_single():
     event['start']['timeZone'] = timeZone['value']
     event['end']['dateTime'] = new_datetime
     event['end']['timeZone'] = timeZone['value']
-    updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+    updated_event = calendar.events().update(calendarId=CAL_ID,
                                              eventId=event['id'], body=event).execute()
-    print(updated_event['updated'])
+    # print(updated_event['updated'])
     return flask.redirect(f'view_events?')
 
 @app.route('/apply_changes_to_all', methods = ['POST'])
@@ -118,24 +114,19 @@ def apply_changes_to_all():
     calendar = build("calendar", "v3", credentials=credentials)
     timeZone = calendar.settings().get(setting="timezone").execute()
     eventID = request.form['eventId']
-    chosenEvent = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+    chosenEvent = calendar.events().get(calendarId=CAL_ID,
                                         eventId=eventID).execute()
     eventTagID = chosenEvent['extendedProperties']['private']['tagID']
-    eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', maxResults=10,
+    eventList = calendar.events().list(calendarId=CAL_ID, maxResults=10,
                                        privateExtendedProperty=f"tagID={eventTagID}").execute()
     eventname = request.form['eventname']
     desc = request.form['eventdescription']
-    weekend_switch = 'weekendswitch' in request.form
     eventhour = request.form['eventhour']
     eventminute = request.form['eventminute']
 
     for event in eventList["items"]:
         event['summary'] = eventname
         event['description'] = desc
-        # if weekend_switch:
-        #    event_datetime =
-        #    isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
-
         if len(eventhour) == 1:
             eventhour = '0' + eventhour
         if len(eventminute) == 1:
@@ -148,10 +139,8 @@ def apply_changes_to_all():
         event['end']['timeZone'] = timeZone['value']
 
         # TODO verify what update() expects
-        updated_event = calendar.events().update(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+        updated_event = calendar.events().update(calendarId=CAL_ID,
                                                  eventId=event['id'], body=event).execute()
-        print(updated_event['updated'])
-
     return flask.redirect(f'view_events?event_tag_id={eventTagID}')
 
 @app.route('/view_events', methods=['GET'])
@@ -163,13 +152,9 @@ def view_events():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    # to do: need to set the time to 12:00 AM?
-
     minday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
-    print(maxday.isoformat())
-    print(minday.isoformat())
-    eventList = calendar.events().list(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+    eventList = calendar.events().list(calendarId=CAL_ID,
                                        timeMax=maxday.isoformat(),
                                        timeMin=minday.isoformat(),
                                        privateExtendedProperty="appID=booboo").execute()
@@ -196,18 +181,12 @@ def get_info_to_edit():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
-    timeZone = calendar.settings().get(setting="timezone").execute()
-
     eventId = request.args['event_id']
-    event = calendar.events().get(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com',
+    event = calendar.events().get(calendarId=CAL_ID,
                                   eventId=eventId).execute()
     # TODO what if the summary/description/etc is blank (None) ? in html, if user doesn't fill it out make it automatically "Untitled1" or smth
     datetime_str = event['start']['dateTime']
     # TODO make it match the user's timezone
-
-    print('datetime_str:')
-    print(datetime_str)
-
     if datetime_str[11] == '0':
         hour = datetime_str[12]
     else:
@@ -241,12 +220,11 @@ def create():
     eventhour = request.form['eventhour']
     eventminute = request.form['eventminute']
     defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
-    print(eventname, desc, weekend_switch, freq_range, eventhour, eventminute, defaulteventtimeswitch)
 
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
-    event_datetime = day0
-    print(event_datetime)
+    tz = pytz.timezone(timeZone["value"])
+    event_datetime = day0.astimezone(tz)
 
     tagID = str(uuid.uuid4())
 
@@ -262,14 +240,9 @@ def create():
         eventminute = int(eventminute)
         event_datetime = event_datetime.replace(hour=eventhour)
         event_datetime = event_datetime.replace(minute=eventminute)
-        print(event_datetime)
-
         isoformat_datetime = (day0 + datetime.timedelta(days=rounddaysplus)).isoformat()
         if weekend_switch:
             isoformat_datetime = weekend_to_weekday(event_datetime).isoformat()
-
-        print(isoformat_datetime)
-
         event = {
             'summary': eventname,
             'description': desc,
@@ -288,9 +261,8 @@ def create():
                     }
             }
         }
-        print(event)
         # Call the Calendar API
-        event = calendar.events().insert(calendarId='0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com', sendNotifications=True, body=event).execute()
+        event = calendar.events().insert(calendarId=CAL_ID, sendNotifications=True, body=event).execute()
         all_links.append(event.get('htmlLink'))
 
         # set to the next day
@@ -321,13 +293,9 @@ def oauthcallback():
             client_config=json.loads(environ["CLIENT_SECRET_JSON"]),
             scopes=['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/calendar.settings.readonly'],
             state=state)
-        print(f"URL={flask.url_for('oauthcallback', _external=True)}")
         flow.redirect_uri = flask.url_for('oauthcallback', _external=True)
-
-        print(f"URL2={flask.request.url}")
         authorization_response = flask.request.url
         flow.fetch_token(authorization_response=authorization_response)
-
         # Store the credentials in the session.
         # ACTION ITEM for developers:
         #     Store user's access and refresh tokens in your data store if
