@@ -14,7 +14,8 @@ import datetime
 import uuid
 import pytz
 
-CAL_ID = 'primary'
+# change this to "primary"
+CAL_ID = '0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com'
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
@@ -153,7 +154,7 @@ def view_events():
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
     minday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
-    maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
+    maxday = (datetime.datetime.today()).astimezone(datetime.timezone.utc)
     eventList = calendar.events().list(calendarId=CAL_ID,
                                        timeMax=maxday.isoformat(),
                                        timeMin=minday.isoformat(),

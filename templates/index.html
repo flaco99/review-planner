@@ -23,16 +23,19 @@
         <div class="row g-5">
             <div class="col-lg-12">
                 <a class="btn btn-outline-primary" href="/view_events" role="button">Cancel</a>
-                <h4 class="mb-3"></h4>
+                <h4 class="mb-4"></h4>
+                <p class="text-muted">Note: Please type something in every field. Otherwise, you will not be able to edit this event in the future. If you want me to fix this bug, (or fix any other bug or add any feature) please let me know
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSetWi6Y7YBCqLBxULjnu_H-y3d3w3qYB4G6WZvE8MZpxXs2_Q/viewform?usp=sf_link">here</a>.</p>
+                <h4 class="mb-4"></h4>
                 <form action="/create" method="post" onsubmit="setDefaultTime()">
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label for="eventname" class="form-label">Event title</label>
-                            <input type="text" class="form-control" id="eventname" name="eventname" placeholder="" value="">
+                            <input type="text" class="form-control" id="eventname" name="eventname" value="">
                         </div>
                         <div class="col-md-6">
                             <label for="eventdescription" class="form-label">Event description</label>
-                            <input type="text" class="form-control" id="eventdescription" name="eventdescription" placeholder="">
+                            <input type="text" class="form-control" id="eventdescription" name="eventdescription" value="">
                         </div>
                     </div>
                     <hr class="my-4">
@@ -61,18 +64,21 @@
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label for="eventhour" class="form-label">Event time (hour)</label>
-                            <input type="text" class="form-control" id="eventhour" name="eventhour" placeholder="0" value="0">
+                            <input type="text" class="form-control" id="eventhour" name="eventhour" value="0">
                         </div>
                         <div class="col-md-6">
                             <label for="eventminute" class="form-label">Event time (minute)</label>
-                            <input type="text" class="form-control" id="eventminute" name="eventminute" placeholder="0" value="0">
+                            <input type="text" class="form-control" id="eventminute" name="eventminute" value="0">
                         </div>
                     </div>
+                    <h4 class="mb-4"></h4>
+                    <p class="text-muted">Note: Please type a 1-2 digit number according to a 24 hour clock. (example: for 4:05 pm, type 16 in event hour and 5 in event minute.)</p>
+                    <h4 class="mb-4"></h4>
                     <h4 class="mb-3"></h4>
                     <div class="col-sm-6">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="defaulteventtimeswitch" name="defaulteventtimeswitch">
-                            <label class="form-label" for="defaulteventtimeswitch">Set ___(time picked)___ as default</label>
+                            <label class="form-label" for="defaulteventtimeswitch">Set this time as default</label>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-question-circle" viewBox="0 0 16 16">
                                 <title>*insert explanation of what this is / means</title>
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
