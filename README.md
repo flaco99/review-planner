@@ -1,4 +1,35 @@
-# review-planner
+# Learning Review Planner
+
+Retaining learned information over time is challenging.
+[Ebbinghaus' Forgetting Curve](https://www.growthengineering.co.uk/what-is-the-forgetting-curve/)
+claims that information retention is improved if you return to the 
+learned material periodically (in exponentially increasing time gaps).
+
+![Forgetting Curve diagram 1](the-forgetting-curve1.jpg)
+<sub>Image source: https://www.growthengineering.co.uk/what-is-the-forgetting-curve/</sub>
+
+![Forgetting Curve diagram 2](combating-the-forgetting-curve-ge1.jpg)
+<sub>Image source: https://www.growthengineering.co.uk/what-is-the-forgetting-curve/</sub>
+
+This webapp automates insertion of events to Google Calendar 
+based on Ebbinghaus' theory.
+
+## Architecture
+
+Flask webapp, using [Google OAuth](https://developers.google.com/identity/protocols/oauth2) 
+for authorization and [Google Calendar API](https://developers.google.com/calendar/api).
+
+System diagram:
+![system diagram](WYFP1333.PNG)
+
+The webapp is available at https://review-planner.vercel.app/. 
+Access to the app is by invitation. Contact me at naomiweissbergtzw@gmail.com to get an invite.
+
+[Vercel](https://vercel.com/) is a PaaS that allows you to deploy Python 
+webapps with a free tier.
+
+TODO: add screenshots
+
 
 ## Running locally
 ```shell

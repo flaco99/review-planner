@@ -14,8 +14,7 @@ import datetime
 import uuid
 import pytz
 
-# change this to "primary"
-CAL_ID = '0n02brmm8ibsam2iaunolb1o4s@group.calendar.google.com'
+CAL_ID = 'votusm3rk7umll40ikri89ruu0@group.calendar.google.com'
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
@@ -56,8 +55,6 @@ def verify_auth():
 
 @app.route('/')
 def home():
-    # import pdb
-    # pdb.set_trace()
     try:
         verify_auth()
     except RefreshError:
