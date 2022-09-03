@@ -28,8 +28,11 @@ Access to the app is by invitation. Contact me at naomiweissbergtzw@gmail.com to
 [Vercel](https://vercel.com/) is a PaaS that allows you to deploy Python 
 webapps with a free tier.
 
-TODO: add screenshots
-
+<sub>Step 1: Fill out information and click "Create Event"</sub>
+![screenshot 2](rp2.png)
+<sub>Step 2: Click "View on Google Calendar"</sub>
+![screenshot 3](rp3.png)
+![screenshot 4](rp4.png)
 
 ## Running locally
 ```shell
