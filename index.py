@@ -217,7 +217,6 @@ def create():
     freq_range = request.form['freqrange']
     eventhour = request.form['eventhour']
     eventminute = request.form['eventminute']
-    defaulteventtimeswitch = request.form.get('defaulteventtimeswitch')
 
     # set the first day
     day0 = datetime.datetime.today() - datetime.timedelta(days=1)
