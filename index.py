@@ -14,7 +14,7 @@ import datetime
 import uuid
 import pytz
 
-CAL_ID = 'votusm3rk7umll40ikri89ruu0@group.calendar.google.com'
+CAL_ID = 'primary'
 
 def weekend_to_weekday(day: datetime.datetime) -> datetime.datetime:
     '''takes a day in google calendar form. checks if it is a weekend.
