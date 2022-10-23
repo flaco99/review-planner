@@ -13,6 +13,7 @@ import calendar
 import datetime
 import uuid
 import pytz
+import logging
 
 CAL_ID = 'primary'
 
@@ -43,6 +44,8 @@ app = Flask(__name__,
             static_url_path='',
             static_folder='static/')
 app.secret_key = environ["FLASK_SECRET_KEY"]
+
+app.logger.addHandler(logging.StreamHandler(sys.stderr))
 
 def verify_auth():
     if 'credentials' not in flask.session:
