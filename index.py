@@ -73,6 +73,14 @@ def about():
         return flask.redirect('authorize')
     return render_template('about.html')
 
+@app.route('/privacypolicy')
+def about():
+    try:
+        verify_auth()
+    except RefreshError:
+        return flask.redirect('authorize')
+    return render_template('privacypolicy.html')
+
 @app.route('/apply_changes_to_single', methods = ['POST'])
 def apply_changes_to_single():
     try:
@@ -206,6 +214,7 @@ def get_info_to_edit():
 
 @app.route('/create', methods = ['POST'])
 def create():
+    app.logger.info("create called")
     try:
         verify_auth()
     except RefreshError:
