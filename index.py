@@ -74,7 +74,7 @@ def about():
     return render_template('about.html')
 
 @app.route('/privacypolicy')
-def about():
+def privacypolicy():
     try:
         verify_auth()
     except RefreshError:
