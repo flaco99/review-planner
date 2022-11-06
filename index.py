@@ -162,8 +162,9 @@ def view_events():
 
     credentials = Credentials(**flask.session['credentials'])
     calendar = build("calendar", "v3", credentials=credentials)
+    timeZone = calendar.settings().get(setting="timezone").execute()
     minday = (datetime.datetime.today() - datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
-    maxday = (datetime.datetime.today()).astimezone(datetime.timezone.utc)
+    maxday = (datetime.datetime.today() + datetime.timedelta(days=1)).astimezone(datetime.timezone.utc)
     eventList = calendar.events().list(calendarId=CAL_ID,
                                        timeMax=maxday.isoformat(),
                                        timeMin=minday.isoformat(),
